@@ -12,18 +12,17 @@ const log = Logger.getLogger(__filename);
 
 /** Initialize a Firebase app from the given config object. */
 export default function FirebaseAppProvider({
-  config,
+  app,
   children,
-}: React.PropsWithChildren<{ config: FirebaseOptions }>): JSX.Element | ReactNull {
+}: React.PropsWithChildren<{ app: FirebaseApp }>): JSX.Element | ReactNull {
   const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | undefined>(undefined);
   useLayoutEffect(() => {
-    const app = initializeApp(config);
     setFirebaseApp(app);
     return () => {
       // Gracefully tear down the app to avoid errors during hot reloading
       deleteApp(app).catch((err) => log.error("Failed to delete Firebase app:", err));
     };
-  }, [config]);
+  }, [app]);
   if (!firebaseApp) {
     return ReactNull;
   }

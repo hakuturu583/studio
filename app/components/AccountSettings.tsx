@@ -25,7 +25,7 @@ export default function AccountSettings(): JSX.Element {
   if (currentUser) {
     content = (
       <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-        <div>Signed in as: {currentUser.email ?? "(no email address)"}</div>
+        <div>Signed in as: {currentUser.data.email}</div>
         <DefaultButton text="Sign out" onClick={() => currentUser.logout()} />
       </Stack>
     );
