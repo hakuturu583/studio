@@ -45,7 +45,7 @@ type State = {
 };
 
 export default class Dropdown<T> extends React.Component<Props<T>, State> {
-  state = { isOpen: false };
+  override state = { isOpen: false };
   toggle = (): void => {
     if (!this.props.disabled) {
       this.setState({ isOpen: !this.state.isOpen });
@@ -75,7 +75,7 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
       ? value.includes(child.props.value)
       : child.props.value === value;
     const onClick = () => this.onClick(child.props.value);
-    if ((child.type as any).isMenuItem === true) {
+    if ((child.type as { isMenuItem?: boolean }).isMenuItem === true) {
       return React.cloneElement(child, { checked, onClick });
     }
     return (
@@ -91,7 +91,8 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
       if (child == undefined) {
         return ReactNull;
       }
-      const inner = (child as any).props.value != undefined ? this.renderItem(child as any) : child;
+      const childEl = child as ReactElement;
+      const inner = childEl.props.value != undefined ? this.renderItem(childEl) : child;
       return <span key={i}>{inner}</span>;
     });
   }
@@ -121,7 +122,7 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
     return button;
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { isOpen } = this.state;
     const { position, flatEdges, menuStyle } = this.props;
     const style = {

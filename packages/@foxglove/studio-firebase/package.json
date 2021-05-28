@@ -21,10 +21,11 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "typescript": "4.2.4"
+    "typescript": "4.3.2"
   },
   "dependencies": {
     "@foxglove/log": "workspace:packages/log",
-    "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-base": "workspace:app",
+    "firebase": "9.0.0-beta.1"
   }
 }

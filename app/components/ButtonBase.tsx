@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
+import { CSSProperties } from "react";
 
 export type Props = {
   id?: string;
@@ -27,9 +28,7 @@ export type Props = {
   onMouseLeave?: (event: React.SyntheticEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
   className?: string;
-  style?: {
-    [key: string]: any;
-  };
+  style?: CSSProperties;
   tooltip?: string;
   innerRef?: React.Ref<HTMLButtonElement>;
 };
@@ -38,7 +37,7 @@ class ButtonBaseImpl extends React.Component<Props> {
   animationId?: ReturnType<typeof requestAnimationFrame>;
   cancelTimeoutId?: ReturnType<typeof setTimeout>;
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this.animationId != undefined) {
       cancelAnimationFrame(this.animationId);
     }
@@ -76,7 +75,7 @@ class ButtonBaseImpl extends React.Component<Props> {
     this.setState({ mouseDown: false });
   };
 
-  render() {
+  override render() {
     const {
       children,
       id,

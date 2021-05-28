@@ -38,31 +38,31 @@ const ErrorBanner = styled.div`
 
 type State = {
   error?: Error;
-  errorInfo?: any;
+  errorInfo?: ErrorInfo;
 };
 
 export default class ErrorBoundary extends React.Component<
   { children: React.ReactNode; hideSourceLocations?: boolean },
   State
 > {
-  state: State = {
+  override state: State = {
     error: undefined,
     errorInfo: undefined,
   };
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     captureException(new AppError(error, errorInfo));
     this.setState({ error, errorInfo });
   }
 
-  render(): React.ReactNode {
+  override render(): React.ReactNode {
     const { error, errorInfo } = this.state;
     if (error) {
       let name = "this panel";
       if (errorInfo && typeof errorInfo.componentStack === "string") {
         const matches = errorInfo.componentStack.match(/^\s*at ([\w()]+) \(/);
-        if (matches && matches.length > 0) {
-          name = matches[1];
+        if (matches && matches.length > 1) {
+          name = matches[1] as string;
         }
       }
       return (

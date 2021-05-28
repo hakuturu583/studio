@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CircularDependencyPlugin from "circular-dependency-plugin";
+import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
@@ -32,7 +33,7 @@ export function makeConfig(
   _: unknown,
   argv: WebpackArgv,
   options?: Options,
-): Pick<Configuration, "resolve" | "module" | "plugins" | "node"> {
+): Pick<Configuration, "resolve" | "module" | "optimization" | "plugins" | "node"> {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
@@ -52,7 +53,14 @@ export function makeConfig(
         crypto: require.resolve("crypto-browserify"),
         fs: false,
         pnpapi: false,
-        perf_hooks: false, // TypeScript tries to use this when running in node
+
+        // TypeScript tries to use this when running in node
+        perf_hooks: false,
+        // Yarn patches these imports into TypeScript for PnP support
+        // https://github.com/microsoft/TypeScript/pull/35206
+        // https://github.com/yarnpkg/berry/pull/2889#issuecomment-849905154
+        module: false,
+
         // These are optional for react-mosaic-component
         "@blueprintjs/core": false,
         "@blueprintjs/icons": false,
@@ -142,12 +150,18 @@ export function makeConfig(
             { loader: "css-loader", options: { sourceMap: true } },
           ],
         },
+        {
+          test: /\.s?css$/,
+          loader: "esbuild-loader",
+          options: { loader: "css", minify: !isDev },
+        },
         { test: /\.scss$/, loader: "sass-loader", options: { sourceMap: true } },
         { test: /\.woff2?$/, type: "asset/inline" },
         { test: /\.(glb|bag|ttf|bin)$/, type: "asset/resource" },
         {
           // TypeScript uses dynamic requires()s when running in node. We can disable these when we
           // bundle it for the renderer.
+          // https://github.com/microsoft/TypeScript/issues/39436
           test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$/,
           loader: "string-replace-loader",
           options: {
@@ -167,6 +181,10 @@ export function makeConfig(
           },
         },
       ],
+    },
+    optimization: {
+      removeAvailableModules: true,
+      minimizer: [new ESBuildMinifyPlugin({ target: "es2020" })],
     },
     plugins: [
       new CircularDependencyPlugin({
