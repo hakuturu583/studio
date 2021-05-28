@@ -4,13 +4,14 @@
 
 import type { FirebaseOptions } from "@firebase/app";
 import { initializeApp } from "@firebase/app";
+import { AuthCredential } from "@firebase/auth";
+import { getFirestore, useFirestoreEmulator } from "@firebase/firestore";
 
-import EmulatedFirestoreDB from "@foxglove/studio-base/providers/EmulatedFirestoreDB";
-import FirebaseAuth from "@foxglove/studio-base/providers/FirebaseAuth";
-import FirebaseRemoteLayoutStorage from "@foxglove/studio-base/providers/FirebaseRemoteStorage";
+import FirebaseAuth from "@foxglove/studio-base/services/FirebaseAuth";
+import FirebaseRemoteLayoutStorage from "@foxglove/studio-base/services/FirebaseRemoteLayoutStorage";
 
-async function login(): Promise<string> {
-  return "";
+async function login(): Promise<AuthCredential> {
+  throw new Error();
 }
 
 describe("firestore test", () => {
@@ -25,9 +26,9 @@ describe("firestore test", () => {
     });
     const firebaseConfig = JSON.parse(configData) as FirebaseOptions;
     const app = initializeApp(firebaseConfig);
-    const db = EmulatedFirestoreDB();
-    const auth = FirebaseAuth({ getLoginCredential: login, db: db, app: app });
-    const storage = FirebaseRemoteLayoutStorage(db, auth);
+    useFirestoreEmulator(getFirestore(app), "localhost", 8081);
+    const auth = new FirebaseAuth(app, login);
+    const storage = new FirebaseRemoteLayoutStorage(app, auth);
     storage.getCurrentUserLayouts();
   });
 });

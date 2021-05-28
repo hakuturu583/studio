@@ -5,8 +5,9 @@
 import { createContext, useContext } from "react";
 
 export interface CurrentUser {
-  email?: string;
-  logout: () => Promise<void>;
+  uid: string;
+  email: string | undefined;
+  teamId: string | undefined;
 }
 
 export interface Auth {
@@ -20,6 +21,8 @@ export interface Auth {
    * particularly important for dev mode on Linux where setAsDefaultProtocolClient doesn't work.
    */
   loginWithCredential: (credential: string) => Promise<void>;
+
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<Auth | undefined>(undefined);

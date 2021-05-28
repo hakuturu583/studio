@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { User, AuthCredential } from "@firebase/auth";
+import { AuthCredential } from "@firebase/auth";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 
-import AuthContext from "@foxglove/studio-base/context/AuthContext";
+import AuthContext, { CurrentUser } from "@foxglove/studio-base/context/AuthContext";
 import { useFirebase } from "@foxglove/studio-base/context/FirebaseAppContext";
 import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
-import FirebaseAuth from "@foxglove/studio-base/providers/FirebaseAuth";
+import FirebaseAuth from "@foxglove/studio-base/services/FirebaseAuth";
 
 type Props = {
   getCredential: () => Promise<AuthCredential>;
@@ -23,32 +23,30 @@ export default function FirebaseAuthProvider({
   const auth = useMemo(() => new FirebaseAuth(app, getCredential), [app, getCredential]);
   const { addToast } = useToasts();
 
-  const [user, setUser] = useState<User | undefined>();
+  const [currentUser, setCurrentUser] = useState<CurrentUser | undefined>();
   useLayoutEffect(() => {
-    const listener = (newUser: User | undefined, error: Error | undefined) => {
+    const listener = (newUser: CurrentUser | undefined, error: Error | undefined) => {
       if (error != undefined) {
-        setUser(undefined);
+        setCurrentUser(undefined);
         addToast(error.toString(), { appearance: "error" });
       } else {
-        setUser(newUser);
+        setCurrentUser(newUser);
       }
     };
+    listener(auth.currentUser, undefined);
     auth.addAuthStateChangeListener(listener);
+    return () => auth.removeAuthStateChangeListener(listener);
   }, [addToast, auth]);
 
   const login = useCallback(() => auth.login(), [auth]);
   const logout = useCallback(() => auth.logout(), [auth]);
   const loginWithCredential = useCallback((str: string) => auth.loginWithCredential(str), [auth]);
 
-  const currentUser = useMemo(
-    () => (user ? { email: user.email ?? undefined, logout } : undefined),
-    [user, logout],
-  );
-
   const value = useShallowMemo({
     currentUser,
     login,
     loginWithCredential,
+    logout,
   });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -15,17 +15,19 @@ import {
 } from "@firebase/auth";
 import { runTransaction, doc, FirebaseFirestore, getFirestore } from "firebase/firestore";
 
-import { Auth } from "@foxglove/studio-base/context/AuthContext";
+import { Auth, CurrentUser } from "@foxglove/studio-base/context/AuthContext";
 import { UserRecord } from "@foxglove/studio-base/types/storage";
 
-type AuthStateChangeListener = (user: User | undefined, error: Error | undefined) => void;
+type UserChangeListener = (user: CurrentUser | undefined, error: Error | undefined) => void;
 
 export default class FirebaseAuth implements Auth {
-  private authStateChangeListeners = new Set<AuthStateChangeListener>();
+  private userChangeListeners = new Set<UserChangeListener>();
   private unsubscribe: Unsubscribe;
   private app: FirebaseApp;
   private db: FirebaseFirestore;
   private getCredential: () => Promise<AuthCredential>;
+
+  currentUser?: CurrentUser = undefined;
 
   constructor(app: FirebaseApp, getCredential: () => Promise<AuthCredential>) {
     this.app = app;
@@ -34,28 +36,69 @@ export default class FirebaseAuth implements Auth {
     this.unsubscribe = onAuthStateChanged(
       getAuth(app),
       (newUser) => {
-        for (const listener of [...this.authStateChangeListeners]) {
-          listener(newUser ?? undefined, undefined);
-        }
+        this.updateCurrentUser(newUser ?? undefined);
       },
       (err) => {
-        for (const listener of [...this.authStateChangeListeners]) {
+        this.currentUserUpdate?.abort();
+        for (const listener of [...this.userChangeListeners]) {
           listener(undefined, err);
         }
       },
     );
   }
 
+  private currentUserUpdate?: AbortController;
+  /**
+   * Given the new Firebase user, fetch the team id and build the Studio CurrentUser object, then
+   * send it to listeners.
+   */
+  private updateCurrentUser(newUser: User | undefined) {
+    this.currentUserUpdate?.abort();
+
+    const controller = new AbortController();
+    this.currentUserUpdate = controller;
+    this.getTeamId(newUser)
+      .then((teamId) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        let currentUser: CurrentUser | undefined;
+        if (newUser) {
+          currentUser = {
+            email: newUser.email ?? undefined,
+            teamId,
+          };
+        }
+        this.currentUser = currentUser;
+        for (const listener of [...this.userChangeListeners]) {
+          listener(currentUser, undefined);
+        }
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        for (const listener of [...this.userChangeListeners]) {
+          listener(undefined, err);
+        }
+      });
+  }
+
+  private getTeamId = async (_user: User | undefined): Promise<string | undefined> => {
+    //FIXME
+    throw new Error("fixme");
+  };
+
   destroy = (): void => {
     this.unsubscribe();
   };
 
-  addAuthStateChangeListener = (listener: AuthStateChangeListener): void => {
-    this.authStateChangeListeners.add(listener);
+  addAuthStateChangeListener = (listener: UserChangeListener): void => {
+    this.userChangeListeners.add(listener);
   };
 
-  removeAuthStateChangeListener = (listener: AuthStateChangeListener): void => {
-    this.authStateChangeListeners.delete(listener);
+  removeAuthStateChangeListener = (listener: UserChangeListener): void => {
+    this.userChangeListeners.delete(listener);
   };
 
   loginWithCredential = async (credentialStr: string): Promise<void> => {
@@ -113,7 +156,6 @@ export default class FirebaseAuth implements Auth {
         }
         tx.set(userDocRef, record);
       }
-      return;
     });
   };
 
@@ -141,7 +183,6 @@ export default class FirebaseAuth implements Auth {
         throw Error("User is not a member");
       }
       tx.update(userDocRef, { teamIds: teamIDs.filter((x) => x !== teamID) });
-      return;
     });
   };
 }
