@@ -15,8 +15,8 @@ import {
 } from "@firebase/auth";
 import { runTransaction, doc, FirebaseFirestore, getFirestore } from "firebase/firestore";
 
-import { Auth, CurrentUser } from "@foxglove/studio-base/context/AuthContext";
-import { UserRecord } from "@foxglove/studio-base/types/storage";
+import { Auth, CurrentUser } from "@foxglove/studio-base";
+import { UserRecord } from "@foxglove/studio-base/types/storage"; //FIXME: how to organize these types?
 
 type UserChangeListener = (user: CurrentUser | undefined, error: Error | undefined) => void;
 
@@ -66,6 +66,7 @@ export default class FirebaseAuth implements Auth {
         if (newUser) {
           currentUser = {
             email: newUser.email ?? undefined,
+            uid: newUser.uid,
             teamId,
           };
         }

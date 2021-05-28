@@ -6,10 +6,11 @@ import { AuthCredential } from "@firebase/auth";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 
-import AuthContext, { CurrentUser } from "@foxglove/studio-base/context/AuthContext";
-import { useFirebase } from "@foxglove/studio-base/context/FirebaseAppContext";
+import { AuthContext, CurrentUser } from "@foxglove/studio-base";
 import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
-import FirebaseAuth from "@foxglove/studio-base/services/FirebaseAuth";
+
+import { useFirebase } from "../context/FirebaseAppContext";
+import FirebaseAuth from "../services/FirebaseAuth";
 
 type Props = {
   getCredential: () => Promise<AuthCredential>;

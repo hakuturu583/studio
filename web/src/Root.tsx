@@ -13,8 +13,11 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
-  FirebaseAppProvider,
 } from "@foxglove/studio-base";
+import {
+  FirebaseAppProvider,
+  FirebaseRemoteLayoutStorageProvider,
+} from "@foxglove/studio-firebase";
 
 import AppConfigurationProvider from "./components/AppConfigurationProvider";
 import NoOpLayoutStorageProvider from "./components/NoOpLayoutStorageProvider";
@@ -55,6 +58,7 @@ export default function Root(): JSX.Element {
     <UserProfileLocalStorageProvider />,
     <FirebaseAppProvider config={firebaseConfig} />,
     <FirebasePopupAuthProvider />,
+    <FirebaseRemoteLayoutStorageProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */
   ];

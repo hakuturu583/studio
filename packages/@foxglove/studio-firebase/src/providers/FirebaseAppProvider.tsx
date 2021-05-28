@@ -6,23 +6,29 @@ import { FirebaseApp, initializeApp, deleteApp, FirebaseOptions } from "@firebas
 import { useLayoutEffect, useState } from "react";
 
 import Logger from "@foxglove/log";
-import { FirebaseAppContext } from "@foxglove/studio-base/context/FirebaseAppContext";
+
+import { FirebaseAppContext } from "../context/FirebaseAppContext";
 
 const log = Logger.getLogger(__filename);
 
+// eslint-disable-next-line no-restricted-syntax
+const ReactNull = null;
+type ReactNull = typeof ReactNull;
+
 /** Initialize a Firebase app from the given config object. */
 export default function FirebaseAppProvider({
-  app,
+  config,
   children,
-}: React.PropsWithChildren<{ app: FirebaseApp }>): JSX.Element | ReactNull {
+}: React.PropsWithChildren<{ config: FirebaseOptions }>): JSX.Element | ReactNull {
   const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | undefined>(undefined);
   useLayoutEffect(() => {
+    const app = initializeApp(config);
     setFirebaseApp(app);
     return () => {
       // Gracefully tear down the app to avoid errors during hot reloading
       deleteApp(app).catch((err) => log.error("Failed to delete Firebase app:", err));
     };
-  }, [app]);
+  }, [config]);
   if (!firebaseApp) {
     return ReactNull;
   }

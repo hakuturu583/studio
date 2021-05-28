@@ -7,8 +7,8 @@ import { initializeApp } from "@firebase/app";
 import { AuthCredential } from "@firebase/auth";
 import { getFirestore, useFirestoreEmulator } from "@firebase/firestore";
 
-import FirebaseAuth from "@foxglove/studio-base/services/FirebaseAuth";
-import FirebaseRemoteLayoutStorage from "@foxglove/studio-base/services/FirebaseRemoteLayoutStorage";
+import FirebaseAuth from "../services/FirebaseAuth";
+import FirebaseRemoteLayoutStorage from "../services/FirebaseRemoteLayoutStorage";
 
 async function login(): Promise<AuthCredential> {
   throw new Error();

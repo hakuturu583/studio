@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { FirebaseOptions } from "@firebase/app";
-import { initializeApp } from "@firebase/app";
 import { ReactElement, useCallback, useMemo } from "react";
 
 import {
@@ -14,12 +13,11 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
-  FirebaseAppProvider,
-  FirebaseAuthProvider,
-  FirebaseAuth,
-  FirestoreDB,
-  FirebaseRemoteLayoutStorageProvider,
 } from "@foxglove/studio-base";
+import {
+  FirebaseAppProvider,
+  FirebaseRemoteLayoutStorageProvider,
+} from "@foxglove/studio-firebase";
 
 import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
@@ -60,13 +58,6 @@ export default function Root(): ReactElement {
     return JSON.parse(config) as FirebaseOptions;
   }, []);
 
-  const loginViaExternalBrowser = useCallback(() => desktopBridge.loginViaExternalBrowser(), []);
-  const app = useMemo(() => {
-    return initializeApp(firebaseConfig);
-  }, [firebaseConfig]);
-  const db = FirestoreDB();
-  const auth = FirebaseAuth({ getLoginCredential: loginViaExternalBrowser, db: db, app: app });
-
   const providers = [
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
@@ -76,9 +67,7 @@ export default function Root(): ReactElement {
     <UserProfileLocalStorageProvider />,
     <FirebaseAppProvider config={firebaseConfig} />,
     <ExternalBrowserFirebaseAuthProvider />,
-    <FirebaseAppProvider app={app} />,
-    <FirebaseAuthProvider auth={auth} />,
-    <FirebaseRemoteLayoutStorageProvider db={db} auth={auth} />,
+    <FirebaseRemoteLayoutStorageProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */
   ];

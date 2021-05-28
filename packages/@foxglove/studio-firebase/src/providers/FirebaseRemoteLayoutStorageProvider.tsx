@@ -4,12 +4,10 @@
 
 import { useMemo } from "react";
 
-import { useAuth } from "@foxglove/studio-base/context/AuthContext";
-import { useFirebase } from "@foxglove/studio-base/context/FirebaseAppContext";
-import RemoteLayoutStorageContext, {
-  RemoteLayoutStorage,
-} from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
-import FirebaseRemoteLayoutStorage from "@foxglove/studio-base/services/FirebaseRemoteLayoutStorage";
+import { useAuth, RemoteLayoutStorageContext, RemoteLayoutStorage } from "@foxglove/studio-base";
+
+import { useFirebase } from "../context/FirebaseAppContext";
+import FirebaseRemoteLayoutStorage from "../services/FirebaseRemoteLayoutStorage";
 
 export default function FirebaseRemoteLayoutStorageProvider({
   children,

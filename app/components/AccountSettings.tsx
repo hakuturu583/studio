@@ -12,7 +12,7 @@ import { useAuth } from "@foxglove/studio-base/context/AuthContext";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 
 export default function AccountSettings(): JSX.Element {
-  const { currentUser, login: loginWithGoogle, loginWithCredential } = useAuth();
+  const { currentUser, login: loginWithGoogle, loginWithCredential, logout } = useAuth();
   const [loginAttempted, setLoginAttempted] = useState(false);
   const prompt = usePrompt();
   const { ref: tooltipRef, tooltip } = useTooltip({
@@ -25,8 +25,8 @@ export default function AccountSettings(): JSX.Element {
   if (currentUser) {
     content = (
       <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-        <div>Signed in as: {currentUser.data.email}</div>
-        <DefaultButton text="Sign out" onClick={() => currentUser.logout()} />
+        <div>Signed in as: {currentUser.email}</div>
+        <DefaultButton text="Sign out" onClick={() => logout()} />
       </Stack>
     );
   } else {
