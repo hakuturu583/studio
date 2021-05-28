@@ -36,5 +36,7 @@ async function getTotalSize(directoryPath: string): Promise<number> {
 it("build size should not grow significantly", async () => {
   const buildDir = path.join(__dirname, "..", ".webpack");
   const buildSizeInBytes = await getTotalSize(buildDir);
+  // eslint-disable-next-line no-restricted-syntax
+  console.info(`Total production build size: ${buildSizeInBytes} bytes`);
   expect(buildSizeInBytes).toBeLessThan(MAX_BUILD_SIZE);
 });
