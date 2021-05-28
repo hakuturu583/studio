@@ -13,7 +13,7 @@ import {
   OAuthCredential,
   AuthCredential,
 } from "@firebase/auth";
-import { runTransaction, doc, FirebaseFirestore } from "firebase/firestore";
+import { runTransaction, doc, FirebaseFirestore, getFirestore } from "firebase/firestore";
 
 import { Auth } from "@foxglove/studio-base/context/AuthContext";
 import { UserRecord } from "@foxglove/studio-base/types/storage";
@@ -27,14 +27,10 @@ export default class FirebaseAuth implements Auth {
   private db: FirebaseFirestore;
   private getCredential: () => Promise<AuthCredential>;
 
-  constructor(
-    db: FirebaseFirestore,
-    app: FirebaseApp,
-    getLoginCredential: () => Promise<AuthCredential>,
-  ) {
+  constructor(app: FirebaseApp, getCredential: () => Promise<AuthCredential>) {
     this.app = app;
-    this.db = db;
-    this.getCredential = getLoginCredential;
+    this.db = getFirestore(app);
+    this.getCredential = getCredential;
     this.unsubscribe = onAuthStateChanged(
       getAuth(app),
       (newUser) => {

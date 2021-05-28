@@ -31,6 +31,7 @@ export { default as FirebaseAuth } from "./providers/FirebaseAuth";
 export { default as waitForFonts } from "./util/waitForFonts";
 export { default as UserProfileLocalStorageProvider } from "./providers/UserProfileLocalStorageProvider";
 export { default as FirebaseAppProvider } from "./providers/FirebaseAppProvider";
+export { default as FirebaseAuthProvider } from "./providers/FirebaseAuthProvider";
 export { useFirebase } from "./context/FirebaseAppContext";
 export { default as FirestoreDBProvider } from "./providers/FirestoreAppProvider";
 export { default as FirebaseRemoteLayoutStorageProvider } from "./providers/FirebaseRemoteLayoutStorageProvider";
