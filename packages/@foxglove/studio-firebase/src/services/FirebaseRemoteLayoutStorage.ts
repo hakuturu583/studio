@@ -57,7 +57,9 @@ export default class FirebaseRemoteLayoutStorage implements RemoteLayoutStorage 
     return results;
   };
 
-  getLayoutHistory = async (layoutName: string): Promise<LayoutMetadata[]> => {
+  getCurrentUserLayoutHistory = async (
+    layoutName: string,
+  ): Promise<LayoutMetadata[] | undefined> => {
     if (this.auth.currentUser == undefined) {
       throw new Error("Log in to view layout history");
     }
@@ -67,6 +69,9 @@ export default class FirebaseRemoteLayoutStorage implements RemoteLayoutStorage 
       where("name", "==", layoutName),
     );
     const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      return undefined;
+    }
     const results: LayoutMetadata[] = [];
     snapshot.forEach((document) => {
       results.push(document.data() as LayoutMetadata);
@@ -74,20 +79,20 @@ export default class FirebaseRemoteLayoutStorage implements RemoteLayoutStorage 
     return results;
   };
 
-  getLayoutByID = async (layoutID: string): Promise<LayoutRecord[]> => {
+  getSharedLayoutHistory = async (_layoutName: string): Promise<LayoutMetadata[] | undefined> => {
+    throw new Error("TODO");
+  };
+
+  getLayoutByID = async (layoutID: string): Promise<LayoutRecord | undefined> => {
     if (this.auth.currentUser == undefined) {
       throw new Error("Log in to fetch layouts");
     }
     const q = query(collection(this.db, "layouts"), where("uid", "==", layoutID));
     const snapshot = await getDocs(q);
-    const results: LayoutRecord[] = [];
-    snapshot.forEach((document) => {
-      results.push(document.data() as LayoutRecord);
-    });
-    return results;
+    return snapshot.docs[0]?.data() as LayoutRecord | undefined;
   };
 
-  putPrivateLayout = async (layout: LayoutRecord): Promise<void> => {
+  putPrivateLayout = async (layout: Omit<LayoutRecord, "uid">): Promise<void> => {
     await runTransaction(this.db, async (tx) => {
       if (this.auth.currentUser == undefined) {
         throw new Error("Log in to upload layouts");
@@ -104,7 +109,7 @@ export default class FirebaseRemoteLayoutStorage implements RemoteLayoutStorage 
     });
   };
 
-  putSharedLayout = async (layout: LayoutRecord): Promise<void> => {
+  putSharedLayout = async (layout: Omit<LayoutRecord, "uid">): Promise<void> => {
     await runTransaction(this.db, async (tx) => {
       if (this.auth.currentUser == undefined) {
         throw new Error("Log in to upload layouts");

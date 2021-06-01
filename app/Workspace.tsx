@@ -25,6 +25,7 @@ import GlobalKeyListener from "@foxglove/studio-base/components/GlobalKeyListene
 import GlobalVariablesTable from "@foxglove/studio-base/components/GlobalVariablesTable";
 import variablesHelp from "@foxglove/studio-base/components/GlobalVariablesTable/index.help.md";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
+import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import LayoutMenu from "@foxglove/studio-base/components/LayoutMenu";
 import messagePathHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
@@ -81,6 +82,7 @@ type SidebarItemKey =
   | "panel-settings"
   | "variables"
   | "account"
+  | "layouts"
   | "preferences";
 
 const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
@@ -98,6 +100,10 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
   ...(process.env.NODE_ENV === "production"
     ? []
     : [
+        [
+          "layouts",
+          { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser },
+        ] as const,
         ["account", { iconName: "Contact", title: "Account", component: AccountSettings }] as const,
       ]),
 ]);

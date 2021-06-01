@@ -87,7 +87,7 @@ export default class FirebaseAuth implements Auth {
 
   private getTeamId = async (_user: User | undefined): Promise<string | undefined> => {
     //FIXME
-    throw new Error("fixme");
+    return undefined;
   };
 
   destroy = (): void => {

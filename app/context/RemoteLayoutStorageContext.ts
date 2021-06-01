@@ -7,23 +7,26 @@ import { createContext, useContext } from "react";
 import { LayoutMetadata, LayoutRecord } from "@foxglove/studio-base/types/storage";
 
 export interface RemoteLayoutStorage {
-  // get a list of layout metadata for the current user
+  /** Get a list of layout metadata for the current user */
   getCurrentUserLayouts: () => Promise<LayoutMetadata[]>;
 
-  // get a list of latest shared layouts for the current user's current team
+  /** Get a list of latest shared layouts for the current user's current team */
   getSharedLayouts: () => Promise<LayoutMetadata[]>;
 
-  // get the full history of private layouts for a single layout name, for the current user
-  getLayoutHistory: (name: string) => Promise<LayoutMetadata[]>;
+  /** Get the full history of private layouts for a single layout name, for the current user */
+  getCurrentUserLayoutHistory: (name: string) => Promise<LayoutMetadata[] | undefined>;
 
-  // get a layout record by UID
-  getLayoutByID: (uid: string) => Promise<LayoutRecord[]>;
+  /** Get the full history of shared layouts for a single layout name */
+  getSharedLayoutHistory: (name: string) => Promise<LayoutMetadata[] | undefined>;
 
-  // upload the current user layout to the private database
-  putPrivateLayout: (layout: LayoutRecord) => Promise<void>;
+  /** Get a layout record by UID */
+  getLayoutByID: (uid: string) => Promise<LayoutRecord | undefined>;
 
-  // upload the current layout to the shared space
-  putSharedLayout: (layout: LayoutRecord) => Promise<void>;
+  /** Upload the current user layout to the private database */
+  putPrivateLayout: (layout: Omit<LayoutRecord, "uid">) => Promise<void>;
+
+  /** Upload the current layout to the shared space */
+  putSharedLayout: (layout: Omit<LayoutRecord, "uid">) => Promise<void>;
 }
 
 const RemoteLayoutStorageContext = createContext<RemoteLayoutStorage | undefined>(undefined);
