@@ -1,10 +1,11 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { Stack, Text, useTheme } from "@fluentui/react";
+import { IconButton, Stack, Text, useTheme } from "@fluentui/react";
 import { useAsync } from "react-use";
 
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
 
@@ -23,8 +24,16 @@ export default function LayoutBrowser(): JSX.Element {
   );
 
   const theme = useTheme();
+  const { createNewLayout } = useCurrentLayoutActions();
   return (
     <SidebarContent title="Layouts">
+      <Stack
+        horizontal
+        tokens={{ childrenGap: theme.spacing.s1 }}
+        style={{ position: "absolute", top: 0, right: 0 }}
+      >
+        <IconButton iconProps={{ iconName: "Add" }} onClick={createNewLayout} />
+      </Stack>
       <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
         <Stack.Item>
           <Stack>

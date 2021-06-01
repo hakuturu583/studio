@@ -131,6 +131,7 @@ export default function CurrentLayoutProvider({
 
   const { getUserProfile } = useUserProfileStorage();
   const layoutStorage = useLayoutStorage();
+  //FIXME: support for remote layout storage
 
   const loadInitialState = useAsync(async (): Promise<PanelsState | undefined> => {
     try {

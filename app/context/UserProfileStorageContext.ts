@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 export type UserProfile = {
   /** The id of the layout the user is currently working with. */
   currentLayoutId?: string;
+  //FIXME: currentLayoutSource: "remote" | "local" ?
 };
 
 export type UserProfileStorage = {

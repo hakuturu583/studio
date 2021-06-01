@@ -23,6 +23,8 @@ export default function FirebaseAppProvider({
   const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | undefined>(undefined);
   useLayoutEffect(() => {
     const app = initializeApp(config);
+    // FIXME: enable persistence? https://firebase.google.com/docs/firestore/manage-data/enable-offline#web-v9_1
+    // may run into issues with multiple windows
     setFirebaseApp(app);
     return () => {
       // Gracefully tear down the app to avoid errors during hot reloading

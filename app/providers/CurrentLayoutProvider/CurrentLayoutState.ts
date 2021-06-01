@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { isEqual } from "lodash";
+import moment from "moment";
 import { getNodeAtPath } from "react-mosaic-component";
 import { v4 as uuidv4 } from "uuid";
 
@@ -100,6 +101,20 @@ export default class CurrentLayoutState implements CurrentLayout {
     getCurrentLayout: (): PanelsState => this.panelsState,
     undoLayoutChange: (): void => this.undoRedo.undo(this.actions.loadLayout),
     redoLayoutChange: (): void => this.undoRedo.redo(this.actions.loadLayout),
+
+    createNewLayout: (): void => {
+      this.dispatch({
+        type: "LOAD_LAYOUT",
+        payload: {
+          name: `Unnamed layout ${moment().format("l")} at ${moment().format("LT")}`,
+          configById: {},
+          globalVariables: {},
+          userNodes: {},
+          linkedGlobalVariables: [],
+          playbackConfig: defaultPlaybackConfig,
+        },
+      });
+    },
 
     savePanelConfigs: (payload: SAVE_PANEL_CONFIGS["payload"]): void =>
       this.dispatch({ type: "SAVE_PANEL_CONFIGS", payload }),
