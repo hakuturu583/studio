@@ -90,6 +90,14 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
     "connection",
     { iconName: "DataManagementSettings", title: "Connection", component: Connection },
   ],
+  ...(process.env.NODE_ENV === "production"
+    ? []
+    : [
+        [
+          "layouts",
+          { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser },
+        ] as const,
+      ]),
   ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
   [
     "panel-settings",
@@ -100,10 +108,6 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
   ...(process.env.NODE_ENV === "production"
     ? []
     : [
-        [
-          "layouts",
-          { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser },
-        ] as const,
         ["account", { iconName: "Contact", title: "Account", component: AccountSettings }] as const,
       ]),
 ]);
