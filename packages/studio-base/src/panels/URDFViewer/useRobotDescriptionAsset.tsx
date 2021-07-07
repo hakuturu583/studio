@@ -7,7 +7,7 @@ import { useLayoutEffect, useState } from "react";
 import { useAsync } from "react-use";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { Asset } from "@foxglove/studio-base/context/AssetContext";
+import { Asset } from "@foxglove/studio-base/context/AssetsContext";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 
@@ -22,9 +22,12 @@ export default function useRobotDescriptionAsset(): {
     if (robotDescriptionParam == undefined) {
       return undefined;
     }
-    return new URDFAssetLoader().load(new File([robotDescriptionParam], "robot_description.urdf"), {
-      basePath: undefined,
-    });
+    return await new URDFAssetLoader().load(
+      new File([robotDescriptionParam], "robot_description.urdf"),
+      {
+        basePath: undefined,
+      },
+    );
   }, [robotDescriptionParam]);
 
   const messageBar = robotDescriptionAssetError && !assetErrorDismissed && (

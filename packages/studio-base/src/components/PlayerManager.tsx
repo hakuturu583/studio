@@ -221,7 +221,8 @@ async function remoteBagFileSource(options: FactoryOptions) {
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
-  return async (playerOptions: BuildPlayerOptions) => buildPlayerFromBagURLs([url], playerOptions);
+  return async (playerOptions: BuildPlayerOptions) =>
+    await buildPlayerFromBagURLs([url], playerOptions);
 }
 
 async function rosbridgeSource(options: FactoryOptions) {
@@ -440,14 +441,9 @@ export default function PlayerManager({
           throw new Error(`Could not create a player for ${selectedSource.name}`);
         }
 
-        if (!params) {
-          params = {};
-        }
-        params.rosHostname = rosHostname;
-
         const playerBuilder = await createPlayerBuilder({
           source: selectedSource,
-          sourceOptions: params,
+          sourceOptions: { ...params, rosHostname },
           prompt,
           storage,
         });

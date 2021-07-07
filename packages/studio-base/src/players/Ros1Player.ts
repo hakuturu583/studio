@@ -114,7 +114,7 @@ export default class Ros1Player implements Player {
     const net = await Sockets.Create();
     const httpServer = await net.createHttpServer();
     const tcpSocketCreate = async (options: { host: string; port: number }): Promise<TcpSocket> => {
-      return net.createSocket(options.host, options.port);
+      return await net.createSocket(options.host, options.port);
     };
     const tcpServer = await net.createServer();
     void tcpServer.listen(undefined, hostname, 10);
@@ -246,7 +246,9 @@ export default class Ros1Player implements Player {
     }
   };
 
-  private _emitState = debouncePromise(async () => {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  private _emitState = debouncePromise(() => {
     if (!this._listener || this._closed) {
       return Promise.resolve();
     }
@@ -390,8 +392,8 @@ export default class Ros1Player implements Player {
       return;
     }
 
-    publishers = publishers.filter(({ topic }) => topic.length > 0 && topic !== "/");
-    const topics = new Set<string>(publishers.map(({ topic }) => topic));
+    const validPublishers = publishers.filter(({ topic }) => topic.length > 0 && topic !== "/");
+    const topics = new Set<string>(validPublishers.map(({ topic }) => topic));
 
     // Clear all problems related to publishing
     this._clearPublishProblems(true);
@@ -404,7 +406,7 @@ export default class Ros1Player implements Player {
     }
 
     // Unadvertise any topics where the dataType changed
-    for (const { topic, datatype } of publishers) {
+    for (const { topic, datatype } of validPublishers) {
       const existingPub = this._rosNode.publications.get(topic);
       if (existingPub != undefined && existingPub.dataType !== datatype) {
         this._rosNode.unadvertise(topic);
@@ -412,7 +414,7 @@ export default class Ros1Player implements Player {
     }
 
     // Advertise new topics
-    for (const { topic, datatype: dataType, datatypes } of publishers) {
+    for (const { topic, datatype: dataType, datatypes } of validPublishers) {
       if (this._rosNode.publications.has(topic)) {
         continue;
       }
