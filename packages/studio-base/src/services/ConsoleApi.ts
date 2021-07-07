@@ -43,6 +43,21 @@ type TokenResponse = {
   id_token: string;
 };
 
+export type UserID = string & { __brand: "UserID" };
+export type LayoutID = string & { __brand: "LayoutID" };
+export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
+
+type Layout = {
+  id: LayoutID;
+  name: string;
+  path: string[];
+  // creator: UserMetadata | undefined;
+  createdAt: ISO8601Timestamp | undefined;
+  updatedAt: ISO8601Timestamp | undefined;
+  permission: "creator_write" | "org_read" | "org_write";
+  data?: unknown;
+};
+
 class ConsoleApi {
   private _baseUrl: string;
   private _authHeader?: string;
@@ -130,6 +145,8 @@ class ConsoleApi {
       throw new Error("Request Failed.");
     }
   }
+
+  async getLayouts(options: { includeData: boolean }): Promise<readonly Layout[]> {}
 }
 
 export type { CurrentUser, Org };
