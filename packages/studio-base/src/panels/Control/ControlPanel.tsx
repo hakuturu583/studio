@@ -62,9 +62,16 @@ const useStyles = makeStyles((theme) => ({
 
 type ControlPanelProps = {
   context: PanelExtensionContext;
+  disableStop?: boolean;
+  disableX?: boolean;
+  disableY?: boolean;
 };
 
-function ControlPanel(props: ControlPanelProps): JSX.Element {
+function ControlPanel({
+  disableStop = false,
+  disableX = false,
+  disableY = false,
+}: ControlPanelProps): JSX.Element {
   // FIXME: Keyboard shortcut mappings
   // FIXME: Send commands back to ROS
 
@@ -102,63 +109,82 @@ function ControlPanel(props: ControlPanelProps): JSX.Element {
   return (
     <div className={classes.root}>
       <svg className={classes.control} viewBox="0 0 256 256">
-        <g {...handleClick("up")}>
-          <path
-            className={clsx(classes.buttonBackground, {
-              [classes.buttonBackgroundPressed]: state.up,
-            })}
-            d="M162.707,78.945c-20.74,-14.771 -48.795,-14.771 -69.535,-0l-42.723,-42.723c44.594,-37.791 110.372,-37.794 154.981,-0l-42.723,42.723Z"
-          />
-          <path className={classes.buttonText} d="M128,30.364l20,20l-40,-0l20,-20Z" />
-        </g>
-        <g {...handleClick("down")}>
-          <path
-            className={clsx(classes.buttonBackground, {
-              [classes.buttonBackgroundPressed]: state.down,
-            })}
-            d="M93.172,176.764c20.74,14.771 48.795,14.771 69.535,0l42.723,42.723c-44.594,37.791 -110.372,37.794 -154.981,0l42.723,-42.723Z"
-          />
-          <path className={classes.buttonText} d="M128,225.345l-20,-20l40,0l-20,20Z" />
-        </g>
-        <g {...handleClick("left")}>
-          <path
-            className={clsx(classes.buttonBackground, {
-              [classes.buttonBackgroundPressed]: state.left,
-            })}
-            d="M36.307,205.345c-37.793,-44.609 -37.791,-110.387 -0,-154.981l42.723,42.723c-14.771,20.74 -14.771,48.795 -0,69.535l-42.723,42.723Z"
-          />
-          <path className={classes.buttonText} d="M30.449,127.854l20,-20l0,40l-20,-20Z" />
-        </g>
-        <g {...handleClick("right")}>
-          <path
-            className={clsx(classes.buttonBackground, {
-              [classes.buttonBackgroundPressed]: state.right,
-            })}
-            d="M219.572,50.364c37.794,44.609 37.791,110.387 0.001,154.981l-42.724,-42.723c14.771,-20.74 14.771,-48.795 0,-69.535l42.723,-42.723Z"
-          />
-          <path className={classes.buttonText} d="M225.43,127.854l-20,20l0,-40l20,20Z" />
-        </g>
-        <g onClick={handleStop}>
-          <circle
-            className={clsx(classes.stopButtonBackgroud, {
-              [classes.stopButtonBackgroudDisabled]: !state.active,
-            })}
-            cx="128"
-            cy="128"
-            r="45"
-          />
-          <text
-            x={128}
-            dy={9}
-            y={128}
-            textAnchor="middle"
-            className={clsx(classes.stopText, {
-              [classes.stopTextDisabled]: !state.active,
-            })}
-          >
-            <tspan>STOP</tspan>
-          </text>
-        </g>
+        {!disableY && (
+          <>
+            {/* UP button */}
+            <g {...handleClick("up")}>
+              <path
+                className={clsx(classes.buttonBackground, {
+                  [classes.buttonBackgroundPressed]: state.up,
+                })}
+                d="M162.707,78.945c-20.74,-14.771 -48.795,-14.771 -69.535,-0l-42.723,-42.723c44.594,-37.791 110.372,-37.794 154.981,-0l-42.723,42.723Z"
+              />
+              <path className={classes.buttonText} d="M128,30.364l20,20l-40,-0l20,-20Z" />
+            </g>
+
+            {/* DOWN button */}
+            <g {...handleClick("down")}>
+              <path
+                className={clsx(classes.buttonBackground, {
+                  [classes.buttonBackgroundPressed]: state.down,
+                })}
+                d="M93.172,176.764c20.74,14.771 48.795,14.771 69.535,0l42.723,42.723c-44.594,37.791 -110.372,37.794 -154.981,0l42.723,-42.723Z"
+              />
+              <path className={classes.buttonText} d="M128,225.345l-20,-20l40,0l-20,20Z" />
+            </g>
+          </>
+        )}
+
+        {!disableX && (
+          <>
+            {/* LEFT button */}
+            <g {...handleClick("left")}>
+              <path
+                className={clsx(classes.buttonBackground, {
+                  [classes.buttonBackgroundPressed]: state.left,
+                })}
+                d="M36.307,205.345c-37.793,-44.609 -37.791,-110.387 -0,-154.981l42.723,42.723c-14.771,20.74 -14.771,48.795 -0,69.535l-42.723,42.723Z"
+              />
+              <path className={classes.buttonText} d="M30.449,127.854l20,-20l0,40l-20,-20Z" />
+            </g>
+
+            {/* RIGHT button */}
+            <g {...handleClick("right")}>
+              <path
+                className={clsx(classes.buttonBackground, {
+                  [classes.buttonBackgroundPressed]: state.right,
+                })}
+                d="M219.572,50.364c37.794,44.609 37.791,110.387 0.001,154.981l-42.724,-42.723c14.771,-20.74 14.771,-48.795 0,-69.535l42.723,-42.723Z"
+              />
+              <path className={classes.buttonText} d="M225.43,127.854l-20,20l0,-40l20,20Z" />
+            </g>
+          </>
+        )}
+
+        {/* STOP button */}
+        {!disableStop && (
+          <g onClick={handleStop}>
+            <circle
+              className={clsx(classes.stopButtonBackgroud, {
+                [classes.stopButtonBackgroudDisabled]: !state.active,
+              })}
+              cx="128"
+              cy="128"
+              r="45"
+            />
+            <text
+              x={128}
+              dy={9}
+              y={128}
+              textAnchor="middle"
+              className={clsx(classes.stopText, {
+                [classes.stopTextDisabled]: !state.active,
+              })}
+            >
+              <tspan>STOP</tspan>
+            </text>
+          </g>
+        )}
       </svg>
     </div>
   );
