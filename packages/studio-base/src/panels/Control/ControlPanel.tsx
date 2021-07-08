@@ -12,9 +12,17 @@ const useStyles = makeStyles((theme) => ({
   // FIXME: This `theme` is not the theme from the current <ThemeProvider />
   // maybe `makeStyles` doesn't work how I think it does?
   root: {
+    backgroundColor: theme.semanticColors.bodyBackground,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     userSelect: "none",
     width: "100%",
     height: "100%",
+  },
+  control: {
+    maxHeight: "100%",
+    maxWidth: "100%",
   },
   buttonBackground: {
     cursor: "pointer",
@@ -58,7 +66,6 @@ type ControlPanelProps = {
 
 function ControlPanel(props: ControlPanelProps): JSX.Element {
   // FIXME: Keyboard shortcut mappings
-
   // FIXME: Send commands back to ROS
 
   const classes = useStyles();
@@ -93,8 +100,8 @@ function ControlPanel(props: ControlPanelProps): JSX.Element {
   });
 
   return (
-    <div className={classes.root} style={{ width: "100%", height: "100%" }}>
-      <svg viewBox="0 0 256 256">
+    <div className={classes.root}>
+      <svg className={classes.control} viewBox="0 0 256 256">
         <g {...handleClick("up")}>
           <path
             className={clsx(classes.buttonBackground, {
