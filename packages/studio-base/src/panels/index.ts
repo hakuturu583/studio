@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 
+import Control from "./Control";
 import GlobalVariableSlider from "./GlobalVariableSlider";
 import ImageViewPanel from "./ImageView";
 import InternalLogs from "./InternalLogs";
@@ -28,6 +29,7 @@ import DiagnosticSummary from "./diagnostics/DiagnosticSummary";
 
 const builtin: PanelInfo[] = [
   { title: "3D", component: ThreeDimensionalViz },
+  { title: "Control", component: Control },
   { title: `Diagnostics – Detail`, component: DiagnosticStatusPanel },
   { title: `Diagnostics – Summary`, component: DiagnosticSummary },
   { title: "Image", component: ImageViewPanel },
