@@ -12,8 +12,6 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import ControlPanel from "./ControlPanel";
 import helpContent from "./index.help.md";
 
-import "leaflet/dist/leaflet.css";
-
 function initPanel(context: PanelExtensionContext) {
   ReactDOM.render(<ControlPanel context={context} />, context.panelElement);
 }
