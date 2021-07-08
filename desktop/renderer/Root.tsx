@@ -50,7 +50,7 @@ export default function Root(): ReactElement {
     <StudioToastProvider />,
     <NativeStorageAppConfigurationProvider />,
     <NativeStorageLayoutCacheProvider />,
-    <LayoutStorageProviders />,
+    // <LayoutStorageProviders />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
     <ExtensionLoaderProvider />,

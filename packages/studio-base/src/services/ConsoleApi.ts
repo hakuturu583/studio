@@ -51,11 +51,11 @@ type Layout = {
   id: LayoutID;
   name: string;
   path: string[];
-  // creator: UserMetadata | undefined;
-  createdAt: ISO8601Timestamp | undefined;
-  updatedAt: ISO8601Timestamp | undefined;
+  creatorUserId: UserID;
+  createdAt: ISO8601Timestamp;
+  updatedAt: ISO8601Timestamp;
   permission: "creator_write" | "org_read" | "org_write";
-  data?: unknown;
+  data?: Record<string, unknown>;
 };
 
 class ConsoleApi {
@@ -99,26 +99,37 @@ class ConsoleApi {
     });
   }
 
-  protected async get<T>(apiPath: string, query?: Record<string, string>): Promise<T> {
+  private async get<T>(apiPath: string, query?: Record<string, string>): Promise<T> {
     return await this.request<T>(
       query == undefined ? apiPath : `${apiPath}?${new URLSearchParams(query).toString()}`,
-      {
-        method: "GET",
-      },
+      { method: "GET" },
     );
   }
 
-  protected async post<T>(apiPath: string, body?: unknown): Promise<T> {
+  private async post<T>(apiPath: string, body?: unknown): Promise<T> {
     return await this.request<T>(apiPath, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
   }
 
-  protected async request<T>(url: string, config?: RequestInit): Promise<T> {
+  private async put<T>(apiPath: string, body?: unknown): Promise<T> {
+    return await this.request<T>(apiPath, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  private async delete<T>(apiPath: string, query?: Record<string, string>): Promise<T> {
+    return await this.request<T>(
+      query == undefined ? apiPath : `${apiPath}?${new URLSearchParams(query).toString()}`,
+      { method: "DELETE" },
+    );
+  }
+
+  private async request<T>(url: string, config?: RequestInit): Promise<T> {
     const fullUrl = `${this._baseUrl}${url}`;
 
     const headers: Record<string, string> = {};
@@ -144,7 +155,33 @@ class ConsoleApi {
     }
   }
 
-  async getLayouts(options: { includeData: boolean }): Promise<readonly Layout[]> {}
+  async getLayouts(options: { includeData: boolean }): Promise<readonly Layout[]> {
+    return await this.get<Layout[]>("/v1/layouts", {
+      include_data: options.includeData ? "true" : "false",
+    });
+  }
+
+  async getLayout(id: LayoutID, options: { includeData: boolean }): Promise<Layout | undefined> {
+    return await this.get<Layout>(`/v1/layouts/${id}`, {
+      include_data: options.includeData ? "true" : "false",
+    });
+  }
+
+  async createLayout(
+    layout: Pick<Layout, "name" | "path" | "permission" | "data">,
+  ): Promise<Layout> {
+    return await this.post<Layout>("/v1/layouts", layout);
+  }
+
+  async updateLayout(
+    layout: Pick<Layout, "id"> & Partial<Pick<Layout, "name" | "path" | "permission" | "data">>,
+  ): Promise<Layout> {
+    return await this.put<Layout>(`/v1/layouts/${layout.id}`, layout);
+  }
+
+  async deleteLayout(id: LayoutID): Promise<void> {
+    await this.delete<Layout>(`/v1/layouts/${id}`);
+  }
 }
 
 export type { CurrentUser, Org };

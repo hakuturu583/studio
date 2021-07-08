@@ -51,7 +51,7 @@ function getEffectiveMetadata(
 
         name: layout.name,
         path: layout.path ?? [],
-        creator: undefined,
+        creatorUserId: undefined,
         createdAt: undefined,
         updatedAt: undefined,
         permission: "creator_write",

@@ -24,7 +24,7 @@ function getMetadata(layout: CachedLayout): LayoutMetadata {
     id: layout.id as LayoutID,
     name: layout.name,
     path: layout.path ?? [],
-    creator: undefined,
+    creatorUserId: undefined,
     createdAt: undefined,
     updatedAt: undefined,
     permission: "creator_write",
