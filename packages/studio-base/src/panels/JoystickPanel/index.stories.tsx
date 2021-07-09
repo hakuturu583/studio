@@ -6,11 +6,11 @@ import { Story, StoryContext } from "@storybook/react";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import ControlPanel from "./index";
+import JoystickPanel from "./index";
 
 export default {
-  title: "panels/Map/index",
-  component: ControlPanel,
+  title: "panels/Joystick/index",
+  component: JoystickPanel,
   decorators: [
     (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
       return (
@@ -23,32 +23,5 @@ export default {
 };
 
 export const EmptyState = (): JSX.Element => {
-  return <ControlPanel />;
-};
-
-export const SinglePoint = (): JSX.Element => {
-  return <ControlPanel />;
-};
-
-SinglePoint.parameters = {
-  chromatic: {
-    delay: 1000,
-  },
-  panelSetup: {
-    fixture: {
-      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
-      frame: {
-        "/gps": [
-          {
-            topic: "/gps",
-            receiveTime: { sec: 123, nsec: 456 },
-            message: {
-              latitude: 0,
-              longitude: 0,
-            },
-          },
-        ],
-      },
-    },
-  },
+  return <JoystickPanel />;
 };

@@ -9,8 +9,6 @@ import { useState } from "react";
 import { PanelExtensionContext } from "@foxglove/studio";
 
 const useStyles = makeStyles((theme) => ({
-  // FIXME: This `theme` is not the theme from the current <ThemeProvider />
-  // maybe `makeStyles` doesn't work how I think it does?
   root: {
     backgroundColor: theme.semanticColors.bodyBackground,
     display: "flex",
@@ -59,18 +57,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type ControlPanelProps = {
+type JoystickPanelProps = {
   context: PanelExtensionContext;
   disableStop?: boolean;
   disableX?: boolean;
   disableY?: boolean;
 };
 
-function ControlPanel({
+function JoystickPanel({
   disableStop = false,
   disableX = false,
   disableY = false,
-}: ControlPanelProps): JSX.Element {
+}: JoystickPanelProps): JSX.Element {
   // FIXME: Keyboard shortcut mappings
   // FIXME: Send commands back to ROS
 
@@ -189,4 +187,4 @@ function ControlPanel({
   );
 }
 
-export default ControlPanel;
+export default JoystickPanel;
