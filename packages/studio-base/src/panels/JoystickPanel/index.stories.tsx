@@ -22,6 +22,8 @@ export default {
   ],
 };
 
+// TODO: Write stories for component settings
+
 export const EmptyState = (): JSX.Element => {
   return <JoystickPanel />;
 };
