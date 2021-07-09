@@ -97,6 +97,7 @@ type JoystickPanelProps = {
   disableStop?: boolean;
   disableX?: boolean;
   disableY?: boolean;
+  stopText?: string;
   title?: string;
 };
 
@@ -104,6 +105,7 @@ function JoystickPanel({
   disableStop = false,
   disableX = false,
   disableY = false,
+  stopText = "STOP",
   title,
 }: JoystickPanelProps): JSX.Element {
   // FIXME: Keyboard shortcut mappings
@@ -239,7 +241,7 @@ function JoystickPanel({
                 [stopButtonClasses.textDisabled]: !state.active,
               })}
             >
-              <tspan>STOP</tspan>
+              <tspan>{stopText}</tspan>
             </text>
           </g>
         )}
