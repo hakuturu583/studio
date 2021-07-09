@@ -44,10 +44,24 @@ const useButtonStyles = makeStyles(({ semanticColors }) => ({
   backgroundDisabled: {
     cursor: "auto",
     strokeWidth: 0,
+
+    ":hover": {
+      fill: semanticColors.bodyBackgroundHovered,
+
+      "+ path": {
+        fill: semanticColors.bodyBackground,
+      },
+    },
   },
   backgroundPressed: {
     fill: `${semanticColors.primaryButtonBackground} !important`,
     stroke: `${semanticColors.primaryButtonBackgroundPressed} !important`,
+
+    ":hover": {
+      "+ path": {
+        fill: semanticColors.buttonTextHovered,
+      },
+    },
   },
   text: {
     pointerEvents: "none",
