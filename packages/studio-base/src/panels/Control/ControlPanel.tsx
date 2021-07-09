@@ -49,11 +49,10 @@ const useStyles = makeStyles((theme) => ({
     fillOpacity: 0.4,
   },
   stopText: {
+    ...theme.fonts.xxLarge,
     cursor: "pointer",
     userSelect: "none",
     fill: theme.semanticColors.bodyBackground,
-    fontSize: "24px",
-    fontFamily: "sans-serif",
   },
   stopTextDisabled: {
     fill: `${theme.semanticColors.primaryButtonText} !important`,
@@ -174,7 +173,7 @@ function ControlPanel({
             />
             <text
               x={128}
-              dy={9}
+              dy={12}
               y={128}
               textAnchor="middle"
               className={clsx(classes.stopText, {

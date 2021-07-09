@@ -7,13 +7,19 @@ import ReactDOM from "react-dom";
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import ControlPanel from "./ControlPanel";
 import helpContent from "./index.help.md";
 
 function initPanel(context: PanelExtensionContext) {
-  ReactDOM.render(<ControlPanel context={context} />, context.panelElement);
+  ReactDOM.render(
+    <ThemeProvider>
+      <ControlPanel context={context} />
+    </ThemeProvider>,
+    context.panelElement,
+  );
 }
 
 type Props = {
