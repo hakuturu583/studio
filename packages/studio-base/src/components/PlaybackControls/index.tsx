@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
 import PauseIcon from "@mdi/svg/svg/pause.svg";
 import PlayIcon from "@mdi/svg/svg/play.svg";
 import RepeatIcon from "@mdi/svg/svg/repeat.svg";
@@ -94,6 +95,7 @@ export const TooltipItem = ({ title, value }: { title: string; value: ReactNode 
 
 export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
   (props: PlaybackControlProps) => {
+    const theme = useTheme();
     const el = useRef<HTMLDivElement>(ReactNull);
     const slider = useRef<Slider>(ReactNull);
     const [repeat, setRepeat] = useState(false);
@@ -110,7 +112,21 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
     const clearHoverValue = useClearHoverValue();
     const setHoverValue = useSetHoverValue();
-
+    const iconButtonStyles: IButtonStyles = {
+      icon: {
+        height: 20,
+        color: theme.palette.neutralSecondary,
+      },
+      iconChecked: { color: theme.semanticColors.buttonTextChecked },
+      iconPressed: { color: theme.semanticColors.buttonTextChecked },
+      iconHovered: { color: theme.palette.themePrimary },
+      root: {},
+      rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+      rootChecked: { backgroundColor: "transparent" },
+      rootCheckedHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+      // rootCheckedPressed: { backgroundColor: "transparent" },
+      // rootHovered: { backgroundColor: "transparent" },
+    };
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
     const playerState = useRef(player);
@@ -261,16 +277,18 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         <KeyListener global keyDownHandlers={keyDownHandlers} />
         <MessageOrderControls />
         <PlaybackSpeedControls />
-        <div>
-          <Icon style={repeat ? {} : { opacity: 0.4 }} large onClick={toggleRepeat}>
-            <RepeatIcon />
-          </Icon>
-        </div>
-        <div className={styles.playIconWrapper} onClick={isPlaying === true ? pause : resumePlay}>
-          <Icon style={activeData ? {} : { opacity: 0.4 }} xlarge>
-            {isPlaying === true ? <PauseIcon /> : <PlayIcon />}
-          </Icon>
-        </div>
+        <IconButton
+          checked={repeat}
+          onClick={toggleRepeat}
+          iconProps={{ iconName: "RepeatAll" }}
+          styles={iconButtonStyles}
+        />
+        <IconButton
+          checked={isPlaying}
+          onClick={isPlaying === true ? pause : resumePlay}
+          iconProps={{ iconName: isPlaying === true ? "Pause" : "Play" }}
+          styles={iconButtonStyles}
+        />
         <div className={styles.bar}>
           <StyledFullWidthBar activeData={activeData} />
           <div className={styles.stateBar}>
