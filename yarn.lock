@@ -12733,6 +12733,7 @@ __metadata:
     html-webpack-plugin: 5.3.2
     jest: 27.0.6
     jest-canvas-mock: 2.3.1
+    json: 11.0.0
     license-checker: 25.0.1
     node-machine-id: 1.1.12
     playwright: 1.12.3
@@ -16244,6 +16245,15 @@ __metadata:
   bin:
     json5: lib/cli.js
   checksum: e88fc5274bb58fc99547baa777886b069d2dd96d9cfc4490b305fd16d711dabd5979e35a4f90873cefbeb552e216b041a304fe56702bedba76e19bc7845f208d
+  languageName: node
+  linkType: hard
+
+"json@npm:11.0.0":
+  version: 11.0.0
+  resolution: "json@npm:11.0.0"
+  bin:
+    json: lib/json.js
+  checksum: 0beb8689722fc30251638543caf791bedc1a25199c18eb0281de115a0dadb00a07d4d36cbd7ff7680e04157fcb2bba76f29ed940b1e4e92f60c6fbaa74523fce
   languageName: node
   linkType: hard
 
