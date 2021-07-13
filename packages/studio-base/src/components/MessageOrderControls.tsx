@@ -4,16 +4,11 @@
 //
 // This file incorporates work covered by the following copyright and
 // permission notice:
-//
-//   Copyright 2020-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
+
+import { DefaultButton, TooltipHost, useTheme } from "@fluentui/react";
+import { useId } from "@fluentui/react-hooks";
 import { useCallback } from "react";
 
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -27,6 +22,8 @@ const messageOrderLabel = {
 };
 
 export default function MessageOrderControls(): JSX.Element {
+  const theme = useTheme();
+  const tooltipId = useId("messageOrderTooltip");
   const messageOrder = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.messageOrder ?? "receiveTime",
   );
@@ -40,25 +37,54 @@ export default function MessageOrderControls(): JSX.Element {
   );
 
   const orderText = messageOrderLabel[messageOrder] ?? defaultPlaybackConfig.messageOrder;
-  const tooltip = `Order messages by ${orderText.toLowerCase()}`;
+
   return (
-    <>
-      <Dropdown
-        position="above"
-        value={messageOrder}
-        text={orderText}
-        onChange={setMessageOrder}
-        tooltip={tooltip}
-        menuStyle={{ width: "125px" }}
-        btnStyle={{ marginRight: "8px", height: "28px" }}
+    <TooltipHost
+      calloutProps={{
+        styles: {
+          // TODO: this needs to be fixed in the theme black is white, white is black
+          beak: { backgroundColor: "#fdfdfd" },
+          beakCurtain: { backgroundColor: "#fdfdfd" },
+        },
+      }}
+      content={`Order messages by ${orderText.toLowerCase()}`}
+      id={tooltipId}
+    >
+      <DefaultButton
+        styles={{
+          root: {
+            background: theme.semanticColors.buttonBackgroundHovered,
+            border: "none",
+          },
+          rootHovered: {
+            background: theme.semanticColors.buttonBackgroundPressed,
+          },
+          label: {
+            fontWeight: 400,
+          },
+        }}
+        menuProps={{
+          gapSpace: 6,
+          items: [
+            {
+              canCheck: true,
+              key: "receiveTime",
+              text: "Receive time",
+              isChecked: messageOrder === "receiveTime",
+              onClick: () => setMessageOrder("receiveTime"),
+            },
+            {
+              canCheck: true,
+              key: "headerStamp",
+              text: "Header stamp",
+              isChecked: messageOrder === "headerStamp",
+              onClick: () => setMessageOrder("headerStamp"),
+            },
+          ],
+        }}
       >
-        <DropdownItem value="receiveTime">
-          <span>{messageOrderLabel.receiveTime}</span>
-        </DropdownItem>
-        <DropdownItem value="headerStamp">
-          <span>{messageOrderLabel.headerStamp}</span>
-        </DropdownItem>
-      </Dropdown>
-    </>
+        {orderText}
+      </DefaultButton>
+    </TooltipHost>
   );
 }
