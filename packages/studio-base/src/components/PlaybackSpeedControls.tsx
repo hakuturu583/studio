@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DefaultButton, useTheme } from "@fluentui/react";
+import { DefaultButton, IContextualMenuItem, useTheme } from "@fluentui/react";
 import { useCallback, useEffect } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
@@ -26,9 +26,8 @@ const SPEEDS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
 
 export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
-  const configSpeed = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.playbackConfig.speed,
-  );
+  const configSpeed =
+    useCurrentLayoutSelector((state) => state.selectedLayout?.data.playbackConfig.speed) ?? 1;
   const { capabilities } = useDataSourceInfo();
   const canSetSpeed = capabilities.includes(PlayerCapabilities.setSpeed);
   const setPlaybackSpeed = useMessagePipeline(
@@ -52,6 +51,8 @@ export default function PlaybackSpeedControls(): JSX.Element {
     }
   }, [configSpeed, setSpeed]);
 
+  const displaySpeed = (val: number) => (val < 0.1 ? val?.toFixed(2) : val);
+
   return (
     <DefaultButton
       menuProps={{
@@ -59,13 +60,15 @@ export default function PlaybackSpeedControls(): JSX.Element {
           calloutMaxWidth: 90,
         },
         gapSpace: 6,
-        items: SPEEDS.map((s: number) => ({
-          canCheck: true,
-          key: s,
-          text: s < 0.1 ? s?.toFixed(2) : s,
-          isChecked: configSpeed === s,
-          onClick: () => setSpeed(s),
-        })),
+        items: SPEEDS.map(
+          (s: number): IContextualMenuItem => ({
+            canCheck: true,
+            key: `${s}`,
+            text: `${displaySpeed(s)}`,
+            isChecked: configSpeed === s,
+            onClick: () => setSpeed(s),
+          }),
+        ),
       }}
       styles={{
         root: {
@@ -81,7 +84,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
         },
       }}
     >
-      {`${configSpeed === < 0.1 ? configSpeed?.toFixed(2) : configSpeed}x` ?? "–"}
+      {`${displaySpeed(configSpeed)}x` ?? "–"}
     </DefaultButton>
   );
 }

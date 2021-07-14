@@ -10,12 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { DefaultButton, useTheme } from "@fluentui/react";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import styled from "styled-components";
 
 import { Time } from "@foxglove/rostime";
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Flex from "@foxglove/studio-base/components/Flex";
 import {
   useCurrentLayoutActions,
@@ -28,8 +28,6 @@ import {
 } from "@foxglove/studio-base/util/formatTime";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove/studio-base/util/time";
-
-import styles from "./index.module.scss";
 
 const SInput = styled.input`
   padding: 8px 4px;
@@ -63,6 +61,7 @@ const PlaybackTimeDisplayMethod = ({
   onPause: () => void;
   isPlaying: boolean;
 }): JSX.Element => {
+  const theme = useTheme();
   const timeDisplayMethod = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.timeDisplayMethod ?? "ROS",
   );
@@ -173,20 +172,42 @@ const PlaybackTimeDisplayMethod = ({
       ) : (
         <span data-test="PlaybackTime-text">–</span>
       )}
-      <Dropdown
-        position="above"
-        value={timeDisplayMethod}
-        text={timeDisplayMethod}
-        onChange={(val) => setTimeDisplayMethod(val)}
-        btnClassname={styles.timeDisplayMethodButton}
+      <DefaultButton
+        menuProps={{
+          gapSpace: 6,
+          items: [
+            {
+              canCheck: true,
+              key: "TOD",
+              text: "Time of day (TOD)",
+              isChecked: timeDisplayMethod === "TOD",
+              onClick: () => setTimeDisplayMethod("TOD"),
+            },
+            {
+              canCheck: true,
+              key: "ROS",
+              text: "ROS time",
+              isChecked: timeDisplayMethod === "ROS",
+              onClick: () => setTimeDisplayMethod("ROS"),
+            },
+          ],
+        }}
+        styles={{
+          root: {
+            background: theme.semanticColors.buttonBackgroundHovered,
+            border: "none",
+            width: "70px",
+          },
+          rootHovered: {
+            background: theme.semanticColors.buttonBackgroundPressed,
+          },
+          label: {
+            fontWeight: 400,
+          },
+        }}
       >
-        <DropdownItem value="TOD">
-          <span key="day">Time of day (TOD)</span>
-        </DropdownItem>
-        <DropdownItem value="ROS">
-          <span key="ros">ROS time</span>
-        </DropdownItem>
-      </Dropdown>
+        {timeDisplayMethod}
+      </DefaultButton>
     </Flex>
   );
 };
