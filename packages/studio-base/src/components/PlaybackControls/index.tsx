@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
+import { Stack, IconButton, IButtonStyles, useTheme } from "@fluentui/react";
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import { Time, compare } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Flex from "@foxglove/studio-base/components/Flex";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import {
@@ -103,29 +102,34 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const clearHoverValue = useClearHoverValue();
     const setHoverValue = useSetHoverValue();
 
-    const iconButtonStyles: IButtonStyles = {
-      icon: {
-        height: 20,
-        color: theme.palette.neutralSecondary,
-      },
-      iconChecked: { color: theme.semanticColors.buttonTextChecked },
-      iconPressed: { color: theme.semanticColors.buttonTextChecked },
-      iconHovered: { color: theme.palette.themePrimary },
-      root: {},
-      rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-      rootChecked: { backgroundColor: "transparent" },
-      rootCheckedHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-    };
+    const iconButtonStyles = ({
+      left = false,
+      right = false,
+    }: {
+      // FIXME: should allow function call without args
+      left?: boolean | undefined;
+      right?: boolean | undefined;
+    }) =>
+      ({
+        icon: {
+          height: 20,
+          color: theme.palette.neutralSecondary,
+        },
+        iconChecked: { color: theme.palette.themePrimary },
+        root: {
+          background: theme.semanticColors.buttonBackgroundHovered,
 
-    const stepIconButtonStyles: IButtonStyles = {
-      icon: {
-        height: 20,
-        color: theme.palette.neutralSecondary,
-      },
-      root: { background: theme.semanticColors.buttonBackgroundHovered },
-      rootHovered: { background: theme.semanticColors.buttonBackgroundPressed },
-      label: { fontWeight: 400 },
-    };
+          ...(left && {
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }),
+          ...(right && {
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }),
+        },
+        rootHovered: { background: theme.semanticColors.buttonBackgroundPressed },
+      } as IButtonStyles);
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
@@ -244,22 +248,31 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     );
 
     return (
-      <Flex row className={styles.container}>
+      <Stack
+        horizontal
+        verticalAlign="center"
+        tokens={{
+          childrenGap: theme.spacing.s2,
+          padding: theme.spacing.s1,
+        }}
+      >
         {tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
         <MessageOrderControls />
         <PlaybackSpeedControls />
         <IconButton
           checked={repeat}
+          disabled={!activeData}
           onClick={toggleRepeat}
           iconProps={{ iconName: "RepeatAll" }}
-          styles={iconButtonStyles}
+          styles={iconButtonStyles({})}
         />
         <IconButton
           checked={isPlaying}
+          disabled={!activeData}
           onClick={isPlaying === true ? pause : resumePlay}
           iconProps={{ iconName: isPlaying === true ? "Pause" : "Play" }}
-          styles={iconButtonStyles}
+          styles={iconButtonStyles({})}
         />
         <div className={styles.bar}>
           <StyledFullWidthBar activeData={activeData} />
@@ -295,19 +308,31 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           isPlaying={isPlaying ?? false}
           timezone={timezone}
         />
-        <IconButton
-          iconProps={{ iconName: "Previous" }}
-          disabled={!activeData}
-          onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
-          styles={stepIconButtonStyles}
-        />
-        <IconButton
-          iconProps={{ iconName: "Next" }}
-          disabled={!activeData}
-          onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
-          styles={stepIconButtonStyles}
-        />
-      </Flex>
+        <Stack horizontal>
+          <IconButton
+            iconProps={{ iconName: "Previous" }}
+            disabled={!activeData}
+            onClick={() =>
+              jumpSeek(DIRECTION.BACKWARD, {
+                seek,
+                player: playerState.current,
+              })
+            }
+            styles={iconButtonStyles({ left: true })}
+          />
+          <IconButton
+            iconProps={{ iconName: "Next" }}
+            disabled={!activeData}
+            onClick={() =>
+              jumpSeek(DIRECTION.FORWARD, {
+                seek,
+                player: playerState.current,
+              })
+            }
+            styles={iconButtonStyles({ right: true })}
+          />
+        </Stack>
+      </Stack>
     );
   },
 );
