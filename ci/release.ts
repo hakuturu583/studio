@@ -2,34 +2,63 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { ArgumentParser, RawDescriptionHelpFormatter } from "argparse";
 import { promises as fs } from "fs";
 import path from "path";
-
-const REPO_ROOT_PATH = path.join(__dirname, "..");
+import semver from "semver";
 
 type PackageJson = {
   version?: string;
 };
 
+enum Command {
+  setVersion = "set-version",
+}
+
+class PrettyError extends Error {}
+
+const REPO_ROOT_PATH = path.join(__dirname, "..");
+
 async function main(): Promise<void> {
-  await recursiveUpdatePackageVersion(REPO_ROOT_PATH, "0.13.0-foo");
-  // fs.readdir(
+  const args = parseArgs(process.argv.slice(2));
+  const command = args.command as string;
 
-  // Parse package.json
-  //   const pkg = JSON.parse(await fs.readFile(REPO_ROOT_PATH, "utf8"));
+  if (command === Command.setVersion) {
+    const version = args.version as string;
 
-  //   // Generate new package version
-  //   const ver = (pkg.version as string).replace(/-.*$/, "");
-  //   const sha = (await execOutput("git", ["rev-parse", "--short", "HEAD"])).trim();
-  //   const date = new Date().toISOString().replace(/T.*$/, "").replace(/-/g, "");
+    if (semver.valid(version) == undefined) {
+      throw new PrettyError(`Invalid version: ${version}`);
+    }
 
-  //   assert.ok(ver, "Missing package.json version");
-  //   assert.ok(sha, "Missing git HEAD shortref");
+    return await recursiveUpdatePackageVersion(REPO_ROOT_PATH, version);
+  }
+}
 
-  //   pkg.version = `${ver}-nightly.${date}.${sha}`;
+function parseArgs(args: string[]) {
+  const parser = new ArgumentParser({
+    formatter_class: RawDescriptionHelpFormatter,
+    description: `
+    Studio version and release management script.
+  
+    Commands:
+      ${Command.setVersion} - Set version number across all package.json files
+    `.trim(),
+  });
+  const command_parser = parser.add_subparsers({ dest: "command", required: true });
 
-  //   // Write package.json
-  //   await fs.writeFile(PACKAGE_JSON_PATH, JSON.stringify(pkg, undefined, 2) + "\n", "utf8");
+  const version_command = command_parser.add_parser(Command.setVersion);
+  version_command.add_argument("version", {
+    type: String,
+    help: "New version string",
+  });
+
+  // Show help if no args passed
+  // First two argv are node interpreter and this script
+  if (args.length === 0) {
+    args.push("--help");
+  }
+
+  return parser.parse_args(args);
 }
 
 async function recursiveUpdatePackageVersion(dir: string, version: string) {
@@ -50,6 +79,8 @@ async function recursiveUpdatePackageVersion(dir: string, version: string) {
       if (pkg.version != undefined && pkg.version !== "") {
         pkg.version = version;
         await fs.writeFile(fullPath, JSON.stringify(pkg, undefined, 2) + "\n", "utf8");
+        // eslint-disable-next-line no-restricted-syntax
+        console.log(`Updated ${fullPath}`);
       }
     }
   }
@@ -57,7 +88,13 @@ async function recursiveUpdatePackageVersion(dir: string, version: string) {
 
 if (require.main === module) {
   main().catch((e) => {
-    console.error(e);
+    if (e instanceof PrettyError) {
+      // no stack trace for expected errors
+      console.error(e.message);
+    } else {
+      // unexpected error
+      console.error(e);
+    }
     process.exit(1);
   });
 }
