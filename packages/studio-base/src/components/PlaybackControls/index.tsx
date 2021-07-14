@@ -258,8 +258,10 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       >
         {tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
-        <MessageOrderControls />
-        <PlaybackSpeedControls />
+        <Stack horizontal>
+          <MessageOrderControls />
+          <PlaybackSpeedControls />
+        </Stack>
         <IconButton
           checked={repeat}
           disabled={!activeData}
