@@ -14,8 +14,9 @@ type PackageJson = {
 };
 
 enum Command {
+  createBranch = "create-branch",
+  bumpDev = "bump-dev",
   setVersion = "set-version",
-  create = "create",
 }
 
 class PrettyError extends Error {}
@@ -26,11 +27,12 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
 
   switch (args.command as string) {
+    case Command.createBranch:
+      return await createBranchCommand(sanitizeVersion(args.version));
+    case Command.bumpDev:
+      return await bumpDevCommand();
     case Command.setVersion:
       return await setVersionCommand(sanitizeVersion(args.version));
-
-    case Command.create:
-      return await createCommand(sanitizeVersion(args.version));
   }
 }
 
@@ -41,20 +43,23 @@ function parseArgs(args: string[]) {
     Studio version and release management script.
   
     Commands:
-      ${Command.create}       Create release candidate branch and trigger GitHub build
-      ${Command.setVersion}  Set version number across all package.json files
+      ${Command.createBranch}   Create release candidate branch and push to GitHub
+      ${Command.bumpDev}        Create "Bump dev" commit on current branch
+      ${Command.setVersion}     Set version number across all package.json files
     `.trim(),
   });
   const command_parser = parser.add_subparsers({ dest: "command", required: true });
 
-  const version_command = command_parser.add_parser(Command.setVersion);
-  version_command.add_argument("version", {
+  const create_command = command_parser.add_parser(Command.createBranch);
+  create_command.add_argument("version", {
     type: String,
     help: "New version string",
   });
 
-  const create_command = command_parser.add_parser(Command.create);
-  create_command.add_argument("version", {
+  command_parser.add_parser(Command.bumpDev);
+
+  const version_command = command_parser.add_parser(Command.setVersion);
+  version_command.add_argument("version", {
     type: String,
     help: "New version string",
   });
@@ -112,14 +117,8 @@ async function recursiveUpdatePackageVersion(dir: string, version: string): Prom
   return updatedFiles;
 }
 
-async function createCommand(version: string): Promise<void> {
-  // fail if git status is not clean
-  const status = await execOutput("git", ["status", "--porcelain"]);
-  if (status !== "") {
-    throw new PrettyError(
-      `Git status is not clean, please fix before running this script.\n\n ${status}`,
-    );
-  }
+async function createBranchCommand(version: string): Promise<void> {
+  await requireCleanGitStatus();
 
   // create new release branch
   await exec("git", ["checkout", "main"]);
@@ -129,9 +128,6 @@ async function createCommand(version: string): Promise<void> {
 
   // create release commit
   await createReleaseCommit(version, `Release v${version}`);
-
-  // create release-dev commit
-  await createReleaseCommit(`${version}-dev`, "Bump dev");
 
   // push to github
   await exec("git", ["push", "--force", "--set-upstream", "origin", `release/v${version}`]);
@@ -143,6 +139,39 @@ async function createReleaseCommit(version: string, message: string) {
 
   await exec("git", ["add", ...updatedFiles]);
   await exec("git", ["commit", "--message", message]);
+}
+
+async function bumpDevCommand(): Promise<void> {
+  await requireCleanGitStatus();
+
+  // get current package.json version
+  const pkg = JSON.parse(
+    await fs.readFile(path.join(REPO_ROOT, "package.json"), "utf8"),
+  ) as PackageJson;
+
+  const version = pkg.version ?? "";
+  if (version.includes("-dev")) {
+    // eslint-disable-next-line no-restricted-syntax
+    console.log(`Current version already dev: ${version}`);
+    return;
+  }
+
+  // update package.json version
+  const updatedFiles = await recursiveUpdatePackageVersion(REPO_ROOT, `${version}-dev`);
+
+  // create commit
+  await exec("git", ["add", ...updatedFiles]);
+  await exec("git", ["commit", "--message", "Bump dev"]);
+}
+
+async function requireCleanGitStatus(): Promise<void> {
+  // fail if git status is not clean
+  const status = await execOutput("git", ["status", "--porcelain"]);
+  if (status !== "") {
+    throw new PrettyError(
+      `Git status is not clean, please fix before running this script.\n\n ${status}`,
+    );
+  }
 }
 
 if (require.main === module) {
