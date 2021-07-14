@@ -7,30 +7,30 @@ import { promises as fs } from "fs";
 import path from "path";
 import semver from "semver";
 
+import { exec, execOutput } from "./exec";
+
 type PackageJson = {
   version?: string;
 };
 
 enum Command {
   setVersion = "set-version",
+  create = "create",
 }
 
 class PrettyError extends Error {}
 
-const REPO_ROOT_PATH = path.join(__dirname, "..");
+const REPO_ROOT = path.join(__dirname, "..");
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
-  const command = args.command as string;
 
-  if (command === Command.setVersion) {
-    const version = args.version as string;
+  switch (args.command as string) {
+    case Command.setVersion:
+      return await setVersionCommand(sanitizeVersion(args.version));
 
-    if (semver.valid(version) == undefined) {
-      throw new PrettyError(`Invalid version: ${version}`);
-    }
-
-    return await recursiveUpdatePackageVersion(REPO_ROOT_PATH, version);
+    case Command.create:
+      return await createCommand(sanitizeVersion(args.version));
   }
 }
 
@@ -41,13 +41,20 @@ function parseArgs(args: string[]) {
     Studio version and release management script.
   
     Commands:
-      ${Command.setVersion} - Set version number across all package.json files
+      ${Command.create}       Create release candidate branch and trigger GitHub build
+      ${Command.setVersion}  Set version number across all package.json files
     `.trim(),
   });
   const command_parser = parser.add_subparsers({ dest: "command", required: true });
 
   const version_command = command_parser.add_parser(Command.setVersion);
   version_command.add_argument("version", {
+    type: String,
+    help: "New version string",
+  });
+
+  const create_command = command_parser.add_parser(Command.create);
+  create_command.add_argument("version", {
     type: String,
     help: "New version string",
   });
@@ -61,8 +68,23 @@ function parseArgs(args: string[]) {
   return parser.parse_args(args);
 }
 
-async function recursiveUpdatePackageVersion(dir: string, version: string) {
+async function setVersionCommand(version: string): Promise<void> {
+  await recursiveUpdatePackageVersion(REPO_ROOT, version);
+}
+
+function sanitizeVersion(version: string): string {
+  const result = semver.valid(version);
+
+  if (result == undefined) {
+    throw new PrettyError(`Invalid version: ${version}`);
+  }
+
+  return result;
+}
+
+async function recursiveUpdatePackageVersion(dir: string, version: string): Promise<string[]> {
   const files = await fs.readdir(dir);
+  const updatedFiles = new Array<string>();
 
   for (const file of files) {
     const fullPath = path.join(dir, file);
@@ -71,19 +93,56 @@ async function recursiveUpdatePackageVersion(dir: string, version: string) {
       // don't recurse into hidden directories or node_modules
     } else if ((await fs.stat(fullPath)).isDirectory()) {
       // recurse into directory
-      await recursiveUpdatePackageVersion(fullPath, version);
+      const moreUpdatedFiles = await recursiveUpdatePackageVersion(fullPath, version);
+      updatedFiles.push(...moreUpdatedFiles);
     } else if (file === "package.json") {
       const pkg = JSON.parse(await fs.readFile(fullPath, "utf8")) as PackageJson;
 
-      // update version if it exists in this package
+      // if this package.json has a version field, update it
       if (pkg.version != undefined && pkg.version !== "") {
         pkg.version = version;
         await fs.writeFile(fullPath, JSON.stringify(pkg, undefined, 2) + "\n", "utf8");
+        updatedFiles.push(fullPath);
         // eslint-disable-next-line no-restricted-syntax
         console.log(`Updated ${fullPath}`);
       }
     }
   }
+
+  return updatedFiles;
+}
+
+async function createCommand(version: string): Promise<void> {
+  // fail if git status is not clean
+  const status = await execOutput("git", ["status", "--porcelain"]);
+  if (status !== "") {
+    throw new PrettyError(
+      `Git status is not clean, please fix before running this script.\n\n ${status}`,
+    );
+  }
+
+  // create new release branch
+  await exec("git", ["checkout", "main"]);
+  await exec("git", ["fetch", "origin", "main"]);
+  await exec("git", ["reset", "--hard", "origin/main"]);
+  await exec("git", ["checkout", "-B", `release/v${version}`]);
+
+  // create release commit
+  await createReleaseCommit(version, `Release v${version}`);
+
+  // create release-dev commit
+  await createReleaseCommit(`${version}-dev`, "Bump dev");
+
+  // push to github
+  await exec("git", ["push", "--force", "--set-upstream", "origin", `release/v${version}`]);
+}
+
+async function createReleaseCommit(version: string, message: string) {
+  // update package.json version
+  const updatedFiles = await recursiveUpdatePackageVersion(REPO_ROOT, version);
+
+  await exec("git", ["add", ...updatedFiles]);
+  await exec("git", ["commit", "--message", message]);
 }
 
 if (require.main === module) {
