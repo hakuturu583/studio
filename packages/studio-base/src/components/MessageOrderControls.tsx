@@ -55,6 +55,7 @@ export default function MessageOrderControls(): JSX.Element {
           root: {
             background: theme.semanticColors.buttonBackgroundHovered,
             border: "none",
+            minWidth: "160px",
           },
           rootHovered: {
             background: theme.semanticColors.buttonBackgroundPressed,

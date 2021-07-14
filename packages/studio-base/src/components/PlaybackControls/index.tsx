@@ -12,21 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
-import PauseIcon from "@mdi/svg/svg/pause.svg";
-import PlayIcon from "@mdi/svg/svg/play.svg";
-import RepeatIcon from "@mdi/svg/svg/repeat.svg";
-import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
-import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
-import classnames from "classnames";
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import { Time, compare } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
-import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import {
@@ -55,8 +47,6 @@ import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-b
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
 import styles from "./index.module.scss";
-
-const cx = classnames.bind(styles);
 
 export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveData }>`
   position: absolute;
@@ -112,6 +102,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
     const clearHoverValue = useClearHoverValue();
     const setHoverValue = useSetHoverValue();
+
     const iconButtonStyles: IButtonStyles = {
       icon: {
         height: 20,
@@ -124,9 +115,18 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
       rootChecked: { backgroundColor: "transparent" },
       rootCheckedHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-      // rootCheckedPressed: { backgroundColor: "transparent" },
-      // rootHovered: { backgroundColor: "transparent" },
     };
+
+    const stepIconButtonStyles: IButtonStyles = {
+      icon: {
+        height: 20,
+        color: theme.palette.neutralSecondary,
+      },
+      root: { background: theme.semanticColors.buttonBackgroundHovered },
+      rootHovered: { background: theme.semanticColors.buttonBackgroundPressed },
+      label: { fontWeight: 400 },
+    };
+
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
     const playerState = useRef(player);
@@ -243,34 +243,6 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       [seek, togglePlayPause],
     );
 
-    const seekControls = useMemo(
-      () => (
-        <>
-          <Button
-            onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
-            style={{ borderRadius: "4px 0px 0px 4px", marginLeft: "16px", marginRight: "1px" }}
-            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
-            tooltip="Seek backward"
-          >
-            <Icon medium>
-              <SkipPreviousOutlineIcon />
-            </Icon>
-          </Button>
-          <Button
-            onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
-            style={{ borderRadius: "0px 4px 4px 0px" }}
-            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
-            tooltip="Seek forward"
-          >
-            <Icon medium>
-              <SkipNextOutlineIcon />
-            </Icon>
-          </Button>
-        </>
-      ),
-      [activeData, seek],
-    );
-
     return (
       <Flex row className={styles.container}>
         {tooltip}
@@ -323,7 +295,18 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           isPlaying={isPlaying ?? false}
           timezone={timezone}
         />
-        {seekControls}
+        <IconButton
+          iconProps={{ iconName: "Previous" }}
+          disabled={!activeData}
+          onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
+          styles={stepIconButtonStyles}
+        />
+        <IconButton
+          iconProps={{ iconName: "Next" }}
+          disabled={!activeData}
+          onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
+          styles={stepIconButtonStyles}
+        />
       </Flex>
     );
   },
