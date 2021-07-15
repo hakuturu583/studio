@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, IconButton, IButtonStyles, useTheme } from "@fluentui/react";
+import { Stack, concatStyleSets, IButtonStyles, useTheme } from "@fluentui/react";
+import { merge } from "lodash";
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
@@ -102,36 +103,6 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
     const clearHoverValue = useClearHoverValue();
     const setHoverValue = useSetHoverValue();
-
-    const iconButtonStyles = ({
-      left = false,
-      right = false,
-    }: {
-      // FIXME: should allow function call without args
-      left?: boolean | undefined;
-      right?: boolean | undefined;
-    }) => {
-      return {
-        icon: {
-          height: 20,
-          color: theme.palette.neutralSecondary,
-        },
-        iconChecked: { color: theme.palette.themePrimary },
-        root: {
-          background: theme.semanticColors.buttonBackgroundHovered,
-
-          ...(left && {
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
-          }),
-          ...(right && {
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-          }),
-        },
-        rootHovered: { background: theme.semanticColors.buttonBackgroundPressed },
-      } as IButtonStyles;
-    };
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
@@ -249,6 +220,41 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       [seek, togglePlayPause],
     );
 
+    const iconButtonStyles: IButtonStyles = {
+      icon: {
+        height: 20,
+      },
+      rootChecked: { color: theme.palette.themePrimary, backgroundColor: "transparent" },
+      rootCheckedHovered: { color: theme.palette.themePrimary },
+      rootHovered: { color: theme.semanticColors.buttonTextHovered },
+      rootPressed: { color: theme.semanticColors.buttonTextPressed },
+      root: { margin: 0, color: theme.semanticColors.buttonText },
+    };
+
+    const seekIconButttonStyles = ({
+      left = false,
+      right = false,
+    }: {
+      left?: boolean | undefined;
+      right?: boolean | undefined;
+    }) =>
+      ({
+        root: {
+          background: theme.semanticColors.buttonBackgroundHovered,
+          ...(left && {
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }),
+          ...(right && {
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }),
+        },
+        rootHovered: {
+          background: theme.semanticColors.buttonBackgroundPressed,
+        },
+      } as IButtonStyles);
+
     return (
       <Stack
         horizontal
@@ -260,26 +266,30 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       >
         {tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
-        <Stack horizontal>
+        <Stack horizontal verticalAlign="center">
           <MessageOrderControls />
           <PlaybackSpeedControls />
         </Stack>
+        <Stack horizontal verticalAlign="center">
+          <HoverableIconButton
+            checked={repeat}
+            disabled={!activeData}
+            onClick={toggleRepeat}
+            iconProps={{
+              iconName: repeat ? "LoopFilled" : "Loop",
+              iconNameActive: "LoopFilled",
+            }}
+            styles={iconButtonStyles}
+          />
+        </Stack>
         <HoverableIconButton
-          checked={repeat}
-          disabled={!activeData}
-          onClick={toggleRepeat}
-          iconProps={{ iconName: "Loop", iconNameActive: "LoopSolid" }}
-          styles={iconButtonStyles({})}
-        />
-        <HoverableIconButton
-          checked={isPlaying}
           disabled={!activeData}
           onClick={isPlaying === true ? pause : resumePlay}
           iconProps={{
             iconName: isPlaying === true ? "Pause" : "Play",
-            iconNameActive: isPlaying === true ? "PauseSolid" : "PlaySolid",
+            iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
           }}
-          styles={iconButtonStyles({})}
+          styles={iconButtonStyles}
         />
         <div className={styles.bar}>
           <StyledFullWidthBar activeData={activeData} />
@@ -315,9 +325,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           isPlaying={isPlaying ?? false}
           timezone={timezone}
         />
-        <Stack horizontal>
-          <IconButton
-            iconProps={{ iconName: "Previous" }}
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
+          <HoverableIconButton
+            iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
             disabled={!activeData}
             onClick={() =>
               jumpSeek(DIRECTION.BACKWARD, {
@@ -325,10 +335,10 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
                 player: playerState.current,
               })
             }
-            styles={iconButtonStyles({ left: true })}
+            styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
           />
-          <IconButton
-            iconProps={{ iconName: "Next" }}
+          <HoverableIconButton
+            iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
             disabled={!activeData}
             onClick={() =>
               jumpSeek(DIRECTION.FORWARD, {
@@ -336,7 +346,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
                 player: playerState.current,
               })
             }
-            styles={iconButtonStyles({ right: true })}
+            styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
           />
         </Stack>
       </Stack>

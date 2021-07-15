@@ -194,15 +194,13 @@ const PlaybackTimeDisplayMethod = ({
         }}
         styles={{
           root: {
-            background: theme.semanticColors.buttonBackgroundHovered,
             border: "none",
-            width: "70px",
+            padding: theme.spacing.s1,
+            minWidth: "50px",
           },
-          rootHovered: {
-            background: theme.semanticColors.buttonBackgroundPressed,
-          },
-          label: {
-            fontWeight: 400,
+          label: theme.fonts.small,
+          menuIcon: {
+            fontSize: theme.fonts.tiny.fontSize,
           },
         }}
       >

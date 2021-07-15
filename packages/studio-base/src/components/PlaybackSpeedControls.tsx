@@ -24,11 +24,7 @@ import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 const SPEEDS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
 
-export default function PlaybackSpeedControls({
-  width = 80,
-}: {
-  width?: number | undefined;
-}): JSX.Element {
+export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
   const configSpeed =
     useCurrentLayoutSelector((state) => state.selectedLayout?.data.playbackConfig.speed) ?? 1;
@@ -61,7 +57,7 @@ export default function PlaybackSpeedControls({
     <DefaultButton
       menuProps={{
         calloutProps: {
-          calloutMaxWidth: width,
+          calloutMaxWidth: 80,
         },
         gapSpace: 6,
         items: SPEEDS.map(
@@ -78,13 +74,15 @@ export default function PlaybackSpeedControls({
         root: {
           background: theme.semanticColors.buttonBackgroundHovered,
           border: "none",
-          width: `${width}px`,
+          padding: theme.spacing.s1,
+          minWidth: "50px",
         },
         rootHovered: {
           background: theme.semanticColors.buttonBackgroundPressed,
         },
-        label: {
-          fontWeight: 400,
+        label: theme.fonts.small,
+        menuIcon: {
+          fontSize: theme.fonts.tiny.fontSize,
         },
       }}
     >

@@ -4,7 +4,7 @@
 
 export default function LoopIcon({ strokeWidth = 1 }: { strokeWidth: number }): JSX.Element {
   return (
-    <svg height="100%" width="100%" viewBox="0 0 24 24">
+    <svg height="100%" viewBox="0 0 24 24">
       <g>
         <path
           fill="none"
@@ -17,7 +17,7 @@ export default function LoopIcon({ strokeWidth = 1 }: { strokeWidth: number }): 
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          strokeLinecap="square"
+          strokeLinecap="round"
           strokeLinejoin="round"
           d="M10.692,3.879l2.121,2.121l-2.121,2.121"
         />
@@ -32,7 +32,7 @@ export default function LoopIcon({ strokeWidth = 1 }: { strokeWidth: number }): 
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          strokeLinecap="square"
+          strokeLinecap="round"
           strokeLinejoin="round"
           d="M13.308,20.121l-2.121,-2.121l2.121,-2.121"
         />

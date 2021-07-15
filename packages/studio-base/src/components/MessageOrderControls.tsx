@@ -55,13 +55,15 @@ export default function MessageOrderControls(): JSX.Element {
           root: {
             background: theme.semanticColors.buttonBackgroundHovered,
             border: "none",
-            minWidth: "160px",
+            minWidth: "100px",
+            padding: theme.spacing.s1,
           },
           rootHovered: {
             background: theme.semanticColors.buttonBackgroundPressed,
           },
-          label: {
-            fontWeight: 400,
+          label: theme.fonts.small,
+          menuIcon: {
+            fontSize: theme.fonts.tiny.fontSize,
           },
         }}
         menuProps={{
