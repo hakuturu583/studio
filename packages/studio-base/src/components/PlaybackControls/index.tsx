@@ -221,14 +221,15 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     );
 
     const iconButtonStyles: IButtonStyles = {
-      icon: {
-        height: 20,
+      icon: { height: 20 },
+      root: {
+        margin: 0, // Remove this when global.scss goes away
+        color: theme.semanticColors.buttonText,
       },
       rootChecked: { color: theme.palette.themePrimary, backgroundColor: "transparent" },
       rootCheckedHovered: { color: theme.palette.themePrimary },
       rootHovered: { color: theme.semanticColors.buttonTextHovered },
       rootPressed: { color: theme.semanticColors.buttonTextPressed },
-      root: { margin: 0, color: theme.semanticColors.buttonText },
     };
 
     const seekIconButttonStyles = ({
@@ -260,17 +261,17 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         horizontal
         verticalAlign="center"
         tokens={{
-          childrenGap: theme.spacing.s2,
+          childrenGap: theme.spacing.s1,
           padding: theme.spacing.s1,
         }}
       >
         {tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
-        <Stack horizontal verticalAlign="center">
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
           <MessageOrderControls />
           <PlaybackSpeedControls />
         </Stack>
-        <Stack horizontal verticalAlign="center">
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
           <HoverableIconButton
             checked={repeat}
             disabled={!activeData}
@@ -281,16 +282,16 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
             }}
             styles={iconButtonStyles}
           />
+          <HoverableIconButton
+            disabled={!activeData}
+            onClick={isPlaying === true ? pause : resumePlay}
+            iconProps={{
+              iconName: isPlaying === true ? "Pause" : "Play",
+              iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
+            }}
+            styles={iconButtonStyles}
+          />
         </Stack>
-        <HoverableIconButton
-          disabled={!activeData}
-          onClick={isPlaying === true ? pause : resumePlay}
-          iconProps={{
-            iconName: isPlaying === true ? "Pause" : "Play",
-            iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
-          }}
-          styles={iconButtonStyles}
-        />
         <div className={styles.bar}>
           <StyledFullWidthBar activeData={activeData} />
           <div className={styles.stateBar}>

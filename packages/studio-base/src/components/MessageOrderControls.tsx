@@ -42,7 +42,7 @@ export default function MessageOrderControls(): JSX.Element {
     <TooltipHost
       calloutProps={{
         styles: {
-          // TODO: this needs to be fixed in the theme black is white, white is black
+          // TODO: this needs to be fixed in the theme
           beak: { backgroundColor: "#fdfdfd" },
           beakCurtain: { backgroundColor: "#fdfdfd" },
         },
@@ -55,6 +55,7 @@ export default function MessageOrderControls(): JSX.Element {
           root: {
             background: theme.semanticColors.buttonBackgroundHovered,
             border: "none",
+            margin: 0, // Remove this once global.scss has gone away
             minWidth: "100px",
             padding: theme.spacing.s1,
           },
