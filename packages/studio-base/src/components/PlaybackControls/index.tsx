@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Time, compare } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import {
@@ -109,8 +110,8 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       // FIXME: should allow function call without args
       left?: boolean | undefined;
       right?: boolean | undefined;
-    }) =>
-      ({
+    }) => {
+      return {
         icon: {
           height: 20,
           color: theme.palette.neutralSecondary,
@@ -129,7 +130,8 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           }),
         },
         rootHovered: { background: theme.semanticColors.buttonBackgroundPressed },
-      } as IButtonStyles);
+      } as IButtonStyles;
+    };
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
@@ -262,18 +264,21 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           <MessageOrderControls />
           <PlaybackSpeedControls />
         </Stack>
-        <IconButton
+        <HoverableIconButton
           checked={repeat}
           disabled={!activeData}
           onClick={toggleRepeat}
-          iconProps={{ iconName: "RepeatAll" }}
+          iconProps={{ iconName: "Loop", iconNameActive: "LoopSolid" }}
           styles={iconButtonStyles({})}
         />
-        <IconButton
+        <HoverableIconButton
           checked={isPlaying}
           disabled={!activeData}
           onClick={isPlaying === true ? pause : resumePlay}
-          iconProps={{ iconName: isPlaying === true ? "Pause" : "Play" }}
+          iconProps={{
+            iconName: isPlaying === true ? "Pause" : "Play",
+            iconNameActive: isPlaying === true ? "PauseSolid" : "PlaySolid",
+          }}
           styles={iconButtonStyles({})}
         />
         <div className={styles.bar}>

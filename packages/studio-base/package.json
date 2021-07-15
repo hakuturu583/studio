@@ -23,10 +23,11 @@
     "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook"
   },
   "devDependencies": {
-    "@fluentui/react": "8.23.2",
-    "@fluentui/react-icons-mdl2": "1.1.6",
+    "@fluentui/react": "8.22.0",
+    "@fluentui/react-icons": "1.1.135",
+    "@fluentui/react-icons-mdl2": "1.1.4",
     "@foxglove/den": "workspace:*",
-    "@foxglove/electron-socket": "1.1.0",
+    "@foxglove/electron-socket": "1.0.0",
     "@foxglove/hooks": "workspace:*",
     "@foxglove/rosbag2-web": "0.1.4",
     "@foxglove/rosmsg-msgs-common": "1.0.0",
