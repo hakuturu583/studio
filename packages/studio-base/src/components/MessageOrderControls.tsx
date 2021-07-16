@@ -5,10 +5,11 @@
 // This file incorporates work covered by the following copyright and
 // permission notice:
 
-import { DefaultButton, TooltipHost, useTheme } from "@fluentui/react";
+import { DefaultButton, useTheme } from "@fluentui/react";
 import { useId } from "@fluentui/react-hooks";
 import { useCallback } from "react";
 
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -23,7 +24,6 @@ const messageOrderLabel = {
 
 export default function MessageOrderControls(): JSX.Element {
   const theme = useTheme();
-  const tooltipId = useId("messageOrderTooltip");
   const messageOrder = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.messageOrder ?? "receiveTime",
   );
@@ -37,20 +37,15 @@ export default function MessageOrderControls(): JSX.Element {
   );
 
   const orderText = messageOrderLabel[messageOrder] ?? defaultPlaybackConfig.messageOrder;
+  const messageOrderTooltip = useTooltip({
+    contents: `Order messages by ${orderText.toLowerCase()}`,
+  });
 
   return (
-    <TooltipHost
-      calloutProps={{
-        styles: {
-          // TODO: this needs to be fixed in the theme
-          beak: { backgroundColor: "#fdfdfd" },
-          beakCurtain: { backgroundColor: "#fdfdfd" },
-        },
-      }}
-      content={`Order messages by ${orderText.toLowerCase()}`}
-      id={tooltipId}
-    >
+    <div>
+      {messageOrderTooltip.tooltip}
       <DefaultButton
+        elementRef={messageOrderTooltip.ref}
         styles={{
           root: {
             background: theme.semanticColors.buttonBackgroundHovered,
@@ -89,6 +84,6 @@ export default function MessageOrderControls(): JSX.Element {
       >
         {orderText}
       </DefaultButton>
-    </TooltipHost>
+    </div>
   );
 }

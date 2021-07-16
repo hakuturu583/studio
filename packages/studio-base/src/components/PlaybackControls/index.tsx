@@ -94,10 +94,13 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       { x: number; y: number; tip: JSX.Element } | undefined
     >();
     const { tooltip } = useTooltip({
-      shown: tooltipState != undefined,
-      noPointerEvents: true,
-      targetPosition: { x: tooltipState?.x ?? 0, y: tooltipState?.y ?? 0 },
       contents: tooltipState?.tip,
+      noPointerEvents: true,
+      shown: tooltipState != undefined,
+      targetPosition: {
+        x: tooltipState?.x ?? 0,
+        y: tooltipState?.y ?? 0,
+      },
     });
     const { seek, pause, play, player } = props;
     const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
@@ -256,6 +259,10 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         },
       } as IButtonStyles);
 
+    const loopTooltip = useTooltip({ contents: "Loop playback" });
+    const seekBackwardTooltip = useTooltip({ contents: "Seek backward" });
+    const seekForwardTooltip = useTooltip({ contents: "Seek forward" });
+
     return (
       <Stack
         horizontal
@@ -266,6 +273,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         }}
       >
         {tooltip}
+        {loopTooltip.tooltip}
+        {seekBackwardTooltip.tooltip}
+        {seekForwardTooltip.tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
           <MessageOrderControls />
@@ -273,6 +283,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         </Stack>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
           <HoverableIconButton
+            elementRef={loopTooltip.ref}
             checked={repeat}
             disabled={!activeData}
             onClick={toggleRepeat}
@@ -328,6 +339,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         />
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
           <HoverableIconButton
+            elementRef={seekBackwardTooltip.ref}
             iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
             disabled={!activeData}
             onClick={() =>
@@ -339,6 +351,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
             styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
           />
           <HoverableIconButton
+            elementRef={seekForwardTooltip.ref}
             iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
             disabled={!activeData}
             onClick={() =>
