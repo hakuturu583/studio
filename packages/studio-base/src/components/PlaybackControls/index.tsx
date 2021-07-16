@@ -13,7 +13,7 @@
 
 import { Stack, IButtonStyles, makeStyles, useTheme } from "@fluentui/react";
 import { merge } from "lodash";
-import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
@@ -94,7 +94,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveData }>`
+export const StyledFullWidthBar = styled.div<{
+  activeData?: PlayerStateActiveData;
+}>`
   position: absolute;
   top: 12px;
   left: 0;
@@ -103,7 +105,9 @@ export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveDat
   height: 4px;
 `;
 
-export const StyledMarker = styled.div.attrs<{ width: number }>(({ width }) => ({
+export const StyledMarker = styled.div.attrs<{
+  width: number;
+}>(({ width }) => ({
   style: { left: `calc(${width * 100}% - 2px)` },
 }))<{ width: number }>`
   background-color: white;
@@ -277,7 +281,10 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         margin: 0, // Remove this when global.scss goes away
         color: theme.semanticColors.buttonText,
       },
-      rootChecked: { color: theme.palette.themePrimary, backgroundColor: "transparent" },
+      rootChecked: {
+        color: theme.palette.themePrimary,
+        backgroundColor: "transparent",
+      },
       rootCheckedHovered: { color: theme.palette.themePrimary },
       rootHovered: { color: theme.semanticColors.buttonTextHovered },
       rootPressed: { color: theme.semanticColors.buttonTextPressed },
