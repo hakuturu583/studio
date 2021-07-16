@@ -193,7 +193,7 @@ export default class RosbridgePlayer implements Player {
 
       for (let i = 0; i < result.topics.length; i++) {
         const topicName = result.topics[i]!;
-        const type = result.types[i]?.replace("/msg/", "/"); //FIXME: does this belong in rosbridge server or client?
+        const type = result.types[i];
         const messageDefinition = result.typedefs_full_text[i];
 
         if (type == undefined || messageDefinition == undefined) {

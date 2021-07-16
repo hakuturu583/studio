@@ -509,11 +509,6 @@ export default function PlayerManager({
       case "ros1-rosbridge-websocket":
       case "ros2-rosbridge-websocket":
         return rosbridgeSource;
-        return async (options: FactoryOptions) =>
-          await rosbridgeSource({
-            ...options,
-            sourceOptions: { ...options.sourceOptions, rosVersion: 2 },
-          });
       case "ros1-remote-bagfile":
         return remoteBagFileSource;
       case "velodyne-device":
