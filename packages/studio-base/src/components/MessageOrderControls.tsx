@@ -6,7 +6,6 @@
 // permission notice:
 
 import { DefaultButton, useTheme } from "@fluentui/react";
-import { useId } from "@fluentui/react-hooks";
 import { useCallback } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
