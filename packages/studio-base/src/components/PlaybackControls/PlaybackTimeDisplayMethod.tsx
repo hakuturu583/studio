@@ -11,12 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DefaultButton, useTheme } from "@fluentui/react";
+import { DefaultButton, Stack, Text, TextField, useTheme } from "@fluentui/react";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import styled from "styled-components";
 
 import { Time } from "@foxglove/rostime";
-import Flex from "@foxglove/studio-base/components/Flex";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -26,23 +24,7 @@ import {
   formatTime,
   getValidatedTimeAndMethodFromString,
 } from "@foxglove/studio-base/util/formatTime";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove/studio-base/util/time";
-
-const SInput = styled.input`
-  padding: 8px 4px;
-  width: calc(100% - 4px);
-`;
-const STimestamp = styled.span`
-  padding: 8px 4px;
-  cursor: pointer;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: ${colors.DARK3};
-    opacity: 0.8;
-  }
-`;
 
 const PlaybackTimeDisplayMethod = ({
   currentTime,
@@ -142,32 +124,55 @@ const PlaybackTimeDisplayMethod = ({
   }, [hasError, inputText, isPlaying]);
 
   return (
-    <Flex start style={{ flexGrow: 0, alignItems: "center", marginLeft: "8px" }}>
+    <Stack
+      horizontal
+      verticalAlign="center"
+      grow={0}
+      tokens={{
+        childrenGap: theme.spacing.s2,
+      }}
+    >
       {currentTime ? (
         isEditing ? (
           <form onSubmit={onSubmit} style={{ width: "100%" }}>
-            <SInput
-              ref={timestampInputRef}
+            <TextField
+              elementRef={timestampInputRef}
               data-test="PlaybackTime-text"
-              style={hasError ? { border: `1px solid ${colors.RED}` } : {}}
+              // FIXME: Error styles
+              // style={hasError ? { border: `1px solid ${colors.RED}` } : {}}
               value={inputText}
               autoFocus
               onFocus={(e) => e.target.select()}
               onBlur={onSubmit}
-              onChange={({ target: { value } }) => setInputText(value)}
+              styles={{ field: { margin: 0 } }}
+              // FIXME: onChange not working
+              // onChange={({ target: { value } }) => setInputText(value)}
             />
           </form>
         ) : (
-          <STimestamp
+          <Text
             data-test="PlaybackTime-text"
             onClick={() => {
               onPause();
               setIsEditing(true);
               setInputText(currentTimeString);
             }}
+            styles={{
+              root: {
+                // FIXME: Jump on ROS method
+                width: "100%",
+                padding: "8px 1px 6px 8px",
+
+                ":hover": {
+                  cursor: "pointer",
+                  borderRadius: 2,
+                  backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+                },
+              },
+            }}
           >
             {currentTimeString}
-          </STimestamp>
+          </Text>
         )
       ) : (
         <span data-test="PlaybackTime-text">–</span>
@@ -207,7 +212,7 @@ const PlaybackTimeDisplayMethod = ({
       >
         {timeDisplayMethod}
       </DefaultButton>
-    </Flex>
+    </Stack>
   );
 };
 

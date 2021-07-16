@@ -337,68 +337,82 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
             <MessageOrderControls />
             <PlaybackSpeedControls />
           </Stack>
-          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
-            <HoverableIconButton
-              elementRef={loopTooltip.ref}
-              checked={repeat}
-              disabled={!activeData}
-              onClick={toggleRepeat}
-              iconProps={{
-                iconName: repeat ? "LoopFilled" : "Loop",
-                iconNameActive: "LoopFilled",
-              }}
-              styles={iconButtonStyles}
-            />
-            <HoverableIconButton
-              disabled={!activeData}
-              onClick={isPlaying === true ? pause : resumePlay}
-              iconProps={{
-                iconName: isPlaying === true ? "Pause" : "Play",
-                iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
-              }}
-              styles={iconButtonStyles}
-            />
-          </Stack>
           <Stack
             horizontal
             verticalAlign="center"
-            styles={{ root: { flex: 1, height: "28px", position: "relative" } }}
+            styles={{ root: { flex: 1 } }}
+            tokens={{
+              childrenGap: theme.spacing.s1,
+              padding: `0 ${theme.spacing.s2}`,
+            }}
           >
-            <StyledFullWidthBar activeData={activeData} />
-            <Stack className={classes.stateBar}>
-              <ProgressPlot progress={progress} />
-            </Stack>
-            <div
-              ref={el}
-              className={classes.sliderContainer}
-              onMouseMove={onMouseMove}
-              onMouseLeave={onMouseLeave}
-            >
-              <Slider
-                ref={slider}
-                min={min ?? 0}
-                max={max ?? 100}
-                disabled={min == undefined || max == undefined}
-                step={step}
-                value={value}
-                draggable
-                onChange={onChange}
-                renderSlider={(val) =>
-                  val == undefined ? undefined : <StyledMarker width={val} />
-                }
+            <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
+              <HoverableIconButton
+                elementRef={loopTooltip.ref}
+                checked={repeat}
+                disabled={!activeData}
+                onClick={toggleRepeat}
+                iconProps={{
+                  iconName: repeat ? "LoopFilled" : "Loop",
+                  iconNameActive: "LoopFilled",
+                }}
+                styles={iconButtonStyles}
               />
-            </div>
-            <PlaybackBarHoverTicks componentId={hoverComponentId} />
+              <HoverableIconButton
+                disabled={!activeData}
+                onClick={isPlaying === true ? pause : resumePlay}
+                iconProps={{
+                  iconName: isPlaying === true ? "Pause" : "Play",
+                  iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
+                }}
+                styles={iconButtonStyles}
+              />
+            </Stack>
+            <Stack
+              horizontal
+              grow={1}
+              verticalAlign="center"
+              styles={{ root: { height: "28px", position: "relative" } }}
+              tokens={{
+                padding: `0 ${theme.spacing.s1}`,
+              }}
+            >
+              <StyledFullWidthBar activeData={activeData} />
+              <Stack className={classes.stateBar}>
+                <ProgressPlot progress={progress} />
+              </Stack>
+              <div
+                ref={el}
+                className={classes.sliderContainer}
+                onMouseMove={onMouseMove}
+                onMouseLeave={onMouseLeave}
+              >
+                <Slider
+                  ref={slider}
+                  min={min ?? 0}
+                  max={max ?? 100}
+                  disabled={min == undefined || max == undefined}
+                  step={step}
+                  value={value}
+                  draggable
+                  onChange={onChange}
+                  renderSlider={(val) =>
+                    val == undefined ? undefined : <StyledMarker width={val} />
+                  }
+                />
+              </div>
+              <PlaybackBarHoverTicks componentId={hoverComponentId} />
+            </Stack>
+            <PlaybackTimeDisplayMethod
+              currentTime={currentTime}
+              startTime={startTime}
+              endTime={endTime}
+              onSeek={seek}
+              onPause={pause}
+              isPlaying={isPlaying ?? false}
+              timezone={timezone}
+            />
           </Stack>
-          <PlaybackTimeDisplayMethod
-            currentTime={currentTime}
-            startTime={startTime}
-            endTime={endTime}
-            onSeek={seek}
-            onPause={pause}
-            isPlaying={isPlaying ?? false}
-            timezone={timezone}
-          />
           <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
             <HoverableIconButton
               elementRef={seekBackwardTooltip.ref}
