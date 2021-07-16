@@ -26,8 +26,9 @@ const SPEEDS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
 
 export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
-  const configSpeed =
-    useCurrentLayoutSelector((state) => state.selectedLayout?.data.playbackConfig.speed) ?? 1;
+  const configSpeed = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.playbackConfig.speed,
+  );
   const { capabilities } = useDataSourceInfo();
   const canSetSpeed = capabilities.includes(PlayerCapabilities.setSpeed);
   const setPlaybackSpeed = useMessagePipeline(
@@ -87,7 +88,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
         },
       }}
     >
-      {`${displaySpeed(configSpeed)}x` ?? "–"}
+      {configSpeed == undefined ? "–" : `${displaySpeed(configSpeed)}×`}
     </DefaultButton>
   );
 }
