@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, IButtonStyles, useTheme } from "@fluentui/react";
+import { Stack, IButtonStyles, makeStyles, useTheme } from "@fluentui/react";
 import { merge } from "lodash";
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -41,13 +41,58 @@ import {
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { PlayerState, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
-import styles from "./index.module.scss";
+
+const useStyles = makeStyles((theme) => ({
+  sliderContainer: {
+    position: "absolute",
+    zIndex: "2",
+    flex: "1",
+    width: "100%",
+    height: "100%",
+  },
+  stateBar: {
+    position: "absolute",
+    zIndex: 1,
+    flex: 1,
+    width: "100%",
+    height: "100%",
+
+    "& canvas": {
+      minWidth: "100%",
+      minHeight: "100%",
+      flex: "1 0 100%",
+    },
+  },
+  tooltip: {
+    fontFamily: MONOSPACE,
+    whiteSpace: "nowrap",
+
+    "> div": {
+      paddingBottom: theme.spacing.s2,
+
+      "&:last-child": {
+        paddingBottom: 0,
+      },
+    },
+  },
+  tooltipTitle: {
+    color: theme.semanticColors.bodyBackground,
+    width: "70px",
+    textAlign: "right",
+    marginRight: theme.spacing.s2,
+    display: "inline-block",
+  },
+  tooltipValue: {
+    fontFamily: MONOSPACE,
+  },
+}));
 
 export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveData }>`
   position: absolute;
@@ -77,15 +122,9 @@ export type PlaybackControlProps = {
   seek: (arg0: Time) => void;
 };
 
-export const TooltipItem = ({ title, value }: { title: string; value: ReactNode }): JSX.Element => (
-  <div>
-    <span className={styles.tipTitle}>{title}:</span>
-    <span className={styles.tipValue}>{value}</span>
-  </div>
-);
-
 export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
   (props: PlaybackControlProps) => {
+    const classes = useStyles();
     const theme = useTheme();
     const el = useRef<HTMLDivElement>(ReactNull);
     const slider = useRef<Slider>(ReactNull);
@@ -135,11 +174,20 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         const stamp = fromSec(value);
         const timeFromStart = subtractTimes(stamp, startTime);
 
+        const tooltipItems = [
+          { title: "ROS", value: formatTimeRaw(stamp) },
+          { title: "Time", value: formatTime(stamp) },
+          { title: "Elapsed", value: `${toSec(timeFromStart).toFixed(9)} sec` },
+        ];
+
         const tip = (
-          <div className={styles.tip}>
-            <TooltipItem title="ROS" value={formatTimeRaw(stamp)} />
-            <TooltipItem title="Time" value={formatTime(stamp)} />
-            <TooltipItem title="Elapsed" value={`${toSec(timeFromStart).toFixed(9)} sec`} />
+          <div className={classes.tooltip}>
+            {tooltipItems.map((item) => (
+              <div key={item.title}>
+                <span className={classes.tooltipTitle}>{item.title}:</span>
+                <span className={classes.tooltipValue}>{item.value}</span>
+              </div>
+            ))}
           </div>
         );
         setTooltipState({ x, y, tip });
@@ -149,7 +197,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           value: toSec(timeFromStart),
         });
       },
-      [setHoverValue, hoverComponentId],
+      [classes, setHoverValue, hoverComponentId],
     );
 
     const onMouseLeave = useCallback(() => {
@@ -264,106 +312,114 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const seekForwardTooltip = useTooltip({ contents: "Seek forward" });
 
     return (
-      <Stack
-        horizontal
-        verticalAlign="center"
-        tokens={{
-          childrenGap: theme.spacing.s1,
-          padding: theme.spacing.s1,
-        }}
-      >
+      <div>
         {tooltip}
         {loopTooltip.tooltip}
         {seekBackwardTooltip.tooltip}
         {seekForwardTooltip.tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
-          <MessageOrderControls />
-          <PlaybackSpeedControls />
-        </Stack>
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
-          <HoverableIconButton
-            elementRef={loopTooltip.ref}
-            checked={repeat}
-            disabled={!activeData}
-            onClick={toggleRepeat}
-            iconProps={{
-              iconName: repeat ? "LoopFilled" : "Loop",
-              iconNameActive: "LoopFilled",
-            }}
-            styles={iconButtonStyles}
-          />
-          <HoverableIconButton
-            disabled={!activeData}
-            onClick={isPlaying === true ? pause : resumePlay}
-            iconProps={{
-              iconName: isPlaying === true ? "Pause" : "Play",
-              iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
-            }}
-            styles={iconButtonStyles}
-          />
-        </Stack>
-        <div className={styles.bar}>
-          <StyledFullWidthBar activeData={activeData} />
-          <div className={styles.stateBar}>
-            <ProgressPlot progress={progress} />
-          </div>
-          <div
-            ref={el}
-            className={styles.sliderContainer}
-            onMouseMove={onMouseMove}
-            onMouseLeave={onMouseLeave}
-          >
-            <Slider
-              ref={slider}
-              min={min ?? 0}
-              max={max ?? 100}
-              disabled={min == undefined || max == undefined}
-              step={step}
-              value={value}
-              draggable
-              onChange={onChange}
-              renderSlider={(val) => (val == undefined ? undefined : <StyledMarker width={val} />)}
+        <Stack
+          horizontal
+          verticalAlign="center"
+          tokens={{
+            childrenGap: theme.spacing.s1,
+            padding: theme.spacing.s1,
+          }}
+        >
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
+            <MessageOrderControls />
+            <PlaybackSpeedControls />
+          </Stack>
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
+            <HoverableIconButton
+              elementRef={loopTooltip.ref}
+              checked={repeat}
+              disabled={!activeData}
+              onClick={toggleRepeat}
+              iconProps={{
+                iconName: repeat ? "LoopFilled" : "Loop",
+                iconNameActive: "LoopFilled",
+              }}
+              styles={iconButtonStyles}
             />
-          </div>
-          <PlaybackBarHoverTicks componentId={hoverComponentId} />
-        </div>
-        <PlaybackTimeDisplayMethod
-          currentTime={currentTime}
-          startTime={startTime}
-          endTime={endTime}
-          onSeek={seek}
-          onPause={pause}
-          isPlaying={isPlaying ?? false}
-          timezone={timezone}
-        />
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
-          <HoverableIconButton
-            elementRef={seekBackwardTooltip.ref}
-            iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
-            disabled={!activeData}
-            onClick={() =>
-              jumpSeek(DIRECTION.BACKWARD, {
-                seek,
-                player: playerState.current,
-              })
-            }
-            styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
+            <HoverableIconButton
+              disabled={!activeData}
+              onClick={isPlaying === true ? pause : resumePlay}
+              iconProps={{
+                iconName: isPlaying === true ? "Pause" : "Play",
+                iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
+              }}
+              styles={iconButtonStyles}
+            />
+          </Stack>
+          <Stack
+            horizontal
+            verticalAlign="center"
+            styles={{ root: { flex: 1, height: "28px", position: "relative" } }}
+          >
+            <StyledFullWidthBar activeData={activeData} />
+            <Stack className={classes.stateBar}>
+              <ProgressPlot progress={progress} />
+            </Stack>
+            <div
+              ref={el}
+              className={classes.sliderContainer}
+              onMouseMove={onMouseMove}
+              onMouseLeave={onMouseLeave}
+            >
+              <Slider
+                ref={slider}
+                min={min ?? 0}
+                max={max ?? 100}
+                disabled={min == undefined || max == undefined}
+                step={step}
+                value={value}
+                draggable
+                onChange={onChange}
+                renderSlider={(val) =>
+                  val == undefined ? undefined : <StyledMarker width={val} />
+                }
+              />
+            </div>
+            <PlaybackBarHoverTicks componentId={hoverComponentId} />
+          </Stack>
+          <PlaybackTimeDisplayMethod
+            currentTime={currentTime}
+            startTime={startTime}
+            endTime={endTime}
+            onSeek={seek}
+            onPause={pause}
+            isPlaying={isPlaying ?? false}
+            timezone={timezone}
           />
-          <HoverableIconButton
-            elementRef={seekForwardTooltip.ref}
-            iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
-            disabled={!activeData}
-            onClick={() =>
-              jumpSeek(DIRECTION.FORWARD, {
-                seek,
-                player: playerState.current,
-              })
-            }
-            styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
-          />
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
+            <HoverableIconButton
+              elementRef={seekBackwardTooltip.ref}
+              iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
+              disabled={!activeData}
+              onClick={() =>
+                jumpSeek(DIRECTION.BACKWARD, {
+                  seek,
+                  player: playerState.current,
+                })
+              }
+              styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
+            />
+            <HoverableIconButton
+              elementRef={seekForwardTooltip.ref}
+              iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
+              disabled={!activeData}
+              onClick={() =>
+                jumpSeek(DIRECTION.FORWARD, {
+                  seek,
+                  player: playerState.current,
+                })
+              }
+              styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
+            />
+          </Stack>
         </Stack>
-      </Stack>
+      </div>
     );
   },
 );
