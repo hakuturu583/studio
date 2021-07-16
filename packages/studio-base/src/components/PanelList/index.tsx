@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
+import { isEmpty } from "lodash";
 import { useEffect, useMemo } from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
@@ -175,12 +176,20 @@ type Props = {
 function verifyPanels(panels: readonly PanelInfo[]) {
   const panelTypes: Map<string, PanelInfo> = new Map();
   for (const panel of panels) {
-    const { title, type } = panel;
+    const { title, type, config } = panel;
+    const dispName = title ?? type ?? "<unnamed>";
+    if (type.length === 0) {
+      throw new Error(`Panel component ${title} must declare a unique \`static panelType\``);
+    }
     const existingPanel = panelTypes.get(type);
     if (existingPanel) {
-      throw new Error(
-        `Two components have the same type ('${type}'): ${existingPanel.title} and ${title}`,
-      );
+      const bothHaveEmptyConfigs = isEmpty(existingPanel.config) && isEmpty(config);
+      if (bothHaveEmptyConfigs) {
+        const otherDisplayName = existingPanel.title ?? existingPanel.type ?? "<unnamed>";
+        throw new Error(
+          `Two components have the same panelType ('${type}') and no preset configs: ${otherDisplayName} and ${dispName}`,
+        );
+      }
     }
     panelTypes.set(type, panel);
   }
@@ -251,6 +260,8 @@ function PanelList(props: Props): JSX.Element {
       } else if (e.key === "Enter" && highlightedPanel) {
         onPanelSelect({
           type: highlightedPanel.type,
+          config: highlightedPanel.config,
+          relatedConfigs: highlightedPanel.relatedConfigs,
         });
       }
     },
@@ -258,17 +269,14 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const displayPanelListItem = React.useCallback(
-    ({ title, type }: PanelInfo) => {
+    ({ title, type, config, relatedConfigs }: PanelInfo) => {
       return (
         <DraggablePanelItem
           key={`${type}-${title}`}
           mosaicId={mosaicId}
-          panel={{
-            type,
-            title,
-          }}
+          panel={{ type, title, config, relatedConfigs }}
           onDrop={onPanelMenuItemDrop}
-          onClick={() => onPanelSelect({ type })}
+          onClick={() => onPanelSelect({ type, config, relatedConfigs })}
           checked={title === selectedPanelTitle}
           highlighted={highlightedPanel?.title === title}
           searchQuery={searchQuery}

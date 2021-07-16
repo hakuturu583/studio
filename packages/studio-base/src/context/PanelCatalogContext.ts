@@ -17,6 +17,8 @@ export type PanelInfo = {
   // The panel module is a function to load the panel.
   // This is to support our lazy built-in panels
   module: () => Promise<{ default: PanelComponent }>;
+  config?: PanelConfig;
+  relatedConfigs?: { [panelId: string]: PanelConfig };
 };
 
 // PanelCatalog describes the interface for getting available panels

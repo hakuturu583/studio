@@ -57,18 +57,19 @@ export default function PanelCatalogProvider(
     });
   }, [extensionRegistry]);
 
+  const alwaysVisiblePanels = useMemo(
+    () => [...panels.builtin, ...panels.preconfigured, ...wrappedExtensionPanels],
+    [wrappedExtensionPanels],
+  );
+
   const allPanels = useMemo(() => {
-    return [...panels.builtin, ...panels.hidden, ...wrappedExtensionPanels];
-  }, [wrappedExtensionPanels]);
+    return [...alwaysVisiblePanels, ...panels.debug, ...panels.hidden];
+  }, [alwaysVisiblePanels]);
 
   const visiblePanels = useMemo(() => {
     // debug panels are hidden by default, users can enable them within app settings
-    if (showDebugPanels) {
-      return [...panels.builtin, ...panels.debug, ...wrappedExtensionPanels];
-    }
-
-    return [...panels.builtin, ...wrappedExtensionPanels];
-  }, [showDebugPanels, wrappedExtensionPanels]);
+    return showDebugPanels ? [...alwaysVisiblePanels, ...panels.debug] : alwaysVisiblePanels;
+  }, [showDebugPanels, alwaysVisiblePanels]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();
