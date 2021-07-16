@@ -24,8 +24,10 @@ export default function HoverableIconButton({
         iconName: iconNameActive != undefined ? (hovered ? iconNameActive : iconName) : iconName,
         ...rest,
       }}
-      onMouseOver={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      {...(props.disabled !== true && {
+        onMouseOver: () => setHovered(true),
+        onMouseLeave: () => setHovered(false),
+      })}
     />
   );
 }
