@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, useTheme } from "@fluentui/react";
+import { DefaultButton, DirectionalHint, useTheme } from "@fluentui/react";
 import { useCallback } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -59,6 +59,7 @@ export default function MessageOrderControls(): JSX.Element {
           },
         }}
         menuProps={{
+          directionalHint: DirectionalHint.topLeftEdge,
           gapSpace: 6,
           items: [
             {

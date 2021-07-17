@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DefaultButton, Stack, Text, TextField, useTheme } from "@fluentui/react";
+import { DefaultButton, DirectionalHint, Stack, Text, TextField, useTheme } from "@fluentui/react";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
 import { Time } from "@foxglove/rostime";
@@ -179,6 +179,7 @@ const PlaybackTimeDisplayMethod = ({
       )}
       <DefaultButton
         menuProps={{
+          directionalHint: DirectionalHint.topLeftEdge,
           gapSpace: 6,
           items: [
             {
