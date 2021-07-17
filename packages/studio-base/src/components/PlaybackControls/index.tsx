@@ -49,7 +49,7 @@ import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-b
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
 
-const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme) => ({
   sliderContainer: {
     position: "absolute",
     zIndex: "2",
