@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack, IButtonStyles, makeStyles, useTheme } from "@fluentui/react";
+import cx from "classnames";
 import { merge } from "lodash";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import { Time, compare } from "@foxglove/rostime";
@@ -39,8 +39,7 @@ import {
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { PlayerState, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { PlayerState } from "@foxglove/studio-base/players/types";
 import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -50,6 +49,25 @@ import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
 
 export const useStyles = makeStyles((theme) => ({
+  fullWidthBar: {
+    position: "absolute",
+    top: "12px",
+    left: "0",
+    right: "0",
+    height: "4px",
+    backgroundColor: theme.palette.neutralLighterAlt,
+  },
+  fullWidthBarActive: {
+    backgroundColor: theme.palette.neutralLight,
+  },
+  marker: {
+    backgroundColor: "white",
+    position: "absolute",
+    height: "36%",
+    border: `1px solid ${theme.semanticColors.bodyText}`,
+    width: "2px",
+    top: "32%",
+  },
   sliderContainer: {
     position: "absolute",
     zIndex: "2",
@@ -94,30 +112,6 @@ export const useStyles = makeStyles((theme) => ({
     opacity: 0.7,
   },
 }));
-
-export const StyledFullWidthBar = styled.div<{
-  activeData?: PlayerStateActiveData;
-}>`
-  position: absolute;
-  top: 12px;
-  left: 0;
-  right: 0;
-  background-color: ${(props) => (props.activeData ? sharedColors.DARK8 : sharedColors.DARK5)};
-  height: 4px;
-`;
-
-export const StyledMarker = styled.div.attrs<{
-  width: number;
-}>(({ width }) => ({
-  style: { left: `calc(${width * 100}% - 2px)` },
-}))<{ width: number }>`
-  background-color: white;
-  position: absolute;
-  height: 36%;
-  border: 1px solid ${colors.divider};
-  width: 2px;
-  top: 32%;
-`;
 
 export type PlaybackControlProps = {
   player: PlayerState;
@@ -378,7 +372,11 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
                 padding: `0 ${theme.spacing.s1}`,
               }}
             >
-              <StyledFullWidthBar activeData={activeData} />
+              <div
+                className={cx(classes.fullWidthBar, {
+                  [classes.fullWidthBarActive]: activeData,
+                })}
+              />
               <Stack className={classes.stateBar}>
                 <ProgressPlot progress={progress} />
               </Stack>
@@ -398,7 +396,12 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
                   draggable
                   onChange={onChange}
                   renderSlider={(val) =>
-                    val == undefined ? undefined : <StyledMarker width={val} />
+                    val == undefined ? undefined : (
+                      <div
+                        className={classes.marker}
+                        style={{ left: `calc(${val * 100}% - 2px)` }}
+                      />
+                    )
                   }
                 />
               </div>
