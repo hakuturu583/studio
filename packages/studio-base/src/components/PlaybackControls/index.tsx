@@ -91,6 +91,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   tooltipValue: {
     fontFamily: MONOSPACE,
+    opacity: 0.7,
   },
 }));
 
