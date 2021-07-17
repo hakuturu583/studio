@@ -56,6 +56,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
 
   return (
     <DefaultButton
+      data-test="PlaybackSpeedControls-Dropdown"
       menuProps={{
         calloutProps: {
           calloutMaxWidth: 80,
