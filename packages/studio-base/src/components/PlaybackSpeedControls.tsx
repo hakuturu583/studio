@@ -55,12 +55,12 @@ export default function PlaybackSpeedControls(): JSX.Element {
         directionalHint: DirectionalHint.topLeftEdge,
         gapSpace: 6,
         items: SPEEDS.map(
-          (s: number): IContextualMenuItem => ({
+          (speed: number): IContextualMenuItem => ({
             canCheck: true,
-            key: `${s}`,
-            text: `${displaySpeed(s)}`,
-            isChecked: configSpeed === s,
-            onClick: () => setSpeed(s),
+            key: `${speed}`,
+            text: `${displaySpeed(speed)}`,
+            isChecked: configSpeed === speed,
+            onClick: () => setSpeed(speed),
           }),
         ),
       }}
