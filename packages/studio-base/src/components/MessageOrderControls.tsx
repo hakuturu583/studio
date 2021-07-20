@@ -60,7 +60,8 @@ export default function MessageOrderControls(): JSX.Element {
         }}
         menuProps={{
           directionalHint: DirectionalHint.topLeftEdge,
-          gapSpace: 6,
+          directionalHintFixed: true,
+          gapSpace: 3,
           items: [
             {
               canCheck: true,

@@ -19,6 +19,7 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import {
   formatDate,
   formatTime,
@@ -49,7 +50,7 @@ const PlaybackTimeDisplayMethod = ({
   );
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
-    (newTimeDisplayMethod: "ROS" | "TOD" | undefined) =>
+    (newTimeDisplayMethod: "ROS" | "TOD") =>
       setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
     [setPlaybackConfig],
   );
@@ -69,7 +70,7 @@ const PlaybackTimeDisplayMethod = ({
   const [hasError, setHasError] = useState<boolean>(false);
 
   const onSubmit = useCallback(
-    (e: React.SyntheticEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
 
       if (inputText == undefined || inputText.length === 0) {
@@ -92,7 +93,6 @@ const PlaybackTimeDisplayMethod = ({
 
       // If input is valid, clear error state, exit edit mode, and seek to input timestamp
       setHasError(false);
-      setIsEditing(false);
       if (
         validTimeAndMethod.time &&
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
@@ -133,35 +133,34 @@ const PlaybackTimeDisplayMethod = ({
       }}
     >
       {currentTime ? (
-        isEditing ? (
-          <form onSubmit={onSubmit} style={{ width: "100%" }}>
-            <TextField
-              elementRef={timestampInputRef}
-              data-test="PlaybackTime-text"
-              // FIXME: Error styles
-              // style={hasError ? { border: `1px solid ${colors.RED}` } : {}}
-              value={inputText}
-              autoFocus
-              onFocus={(e) => e.target.select()}
-              onBlur={onSubmit}
-              styles={{ field: { margin: 0 } }}
-              // FIXME: onChange not working
-              // onChange={({ target: { value } }) => setInputText(value)}
-            />
-          </form>
-        ) : (
-          <Text
+        // isEditing ? (
+        <form onSubmit={onSubmit} style={{ width: "100%" }}>
+          <TextField
+            ariaLabel="Playback Time Method"
             data-test="PlaybackTime-text"
-            onClick={() => {
+            elementRef={timestampInputRef}
+            value={isEditing ? inputText : currentTimeString}
+            errorMessage={hasError ? "Invalid Time" : undefined}
+            onFocus={(e) => {
               onPause();
+              setHasError(false);
               setIsEditing(true);
               setInputText(currentTimeString);
+              e.target.select();
             }}
+            onBlur={(e) => {
+              onSubmit(e);
+              setIsEditing(false);
+            }}
+            size={22}
             styles={{
-              root: {
-                // FIXME: Jump on ROS method
-                width: "100%",
-                padding: "8px 1px 6px 8px",
+              errorMessage: {
+                display: "none",
+              },
+              field: {
+                margin: 0,
+                whiteSpace: "nowrap",
+                fontFamily: MONOSPACE,
 
                 ":hover": {
                   cursor: "pointer",
@@ -169,18 +168,22 @@ const PlaybackTimeDisplayMethod = ({
                   backgroundColor: theme.semanticColors.buttonBackgroundHovered,
                 },
               },
+              fieldGroup: {
+                border: "none",
+              },
+              icon: { height: 20 },
             }}
-          >
-            {currentTimeString}
-          </Text>
-        )
+            onChange={(_, newValue) => setInputText(newValue)}
+          />
+        </form>
       ) : (
         <span data-test="PlaybackTime-text">–</span>
       )}
       <DefaultButton
         menuProps={{
           directionalHint: DirectionalHint.topLeftEdge,
-          gapSpace: 6,
+          directionalHintFixed: true,
+          gapSpace: 3,
           items: [
             {
               canCheck: true,

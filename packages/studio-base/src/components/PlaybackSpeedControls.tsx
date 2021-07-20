@@ -13,12 +13,19 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
-const SPEEDS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
+const SPEED_OPTIONS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
+
+function formatSpeed(val: number) {
+  return val < 0.1 ? val?.toFixed(2) : val;
+}
 
 export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
   const configSpeed = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.speed,
+  );
+  const speed = useMessagePipeline(
+    useCallback(({ playerState }) => playerState.activeData?.speed, []),
   );
   const { capabilities } = useDataSourceInfo();
   const canSetSpeed = capabilities.includes(PlayerCapabilities.setSpeed);
@@ -43,7 +50,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
     }
   }, [configSpeed, setSpeed]);
 
-  const displaySpeed = (val: number) => (val < 0.1 ? val?.toFixed(2) : val);
+  const displayedSpeed = speed ?? configSpeed;
 
   return (
     <DefaultButton
@@ -53,14 +60,15 @@ export default function PlaybackSpeedControls(): JSX.Element {
           calloutMaxWidth: 80,
         },
         directionalHint: DirectionalHint.topLeftEdge,
-        gapSpace: 6,
-        items: SPEEDS.map(
-          (speed: number): IContextualMenuItem => ({
+        directionalHintFixed: true,
+        gapSpace: 3,
+        items: SPEED_OPTIONS.map(
+          (option: number): IContextualMenuItem => ({
             canCheck: true,
-            key: `${speed}`,
-            text: `${displaySpeed(speed)}`,
-            isChecked: configSpeed === speed,
-            onClick: () => setSpeed(speed),
+            key: `${option}`,
+            text: `${formatSpeed(option)}`,
+            isChecked: displayedSpeed === option,
+            onClick: () => setSpeed(option),
           }),
         ),
       }}
@@ -75,13 +83,16 @@ export default function PlaybackSpeedControls(): JSX.Element {
         rootHovered: {
           background: theme.semanticColors.buttonBackgroundPressed,
         },
-        label: theme.fonts.small,
+        label: {
+          // FIXME: no line break
+          ...theme.fonts.small,
+        },
         menuIcon: {
           fontSize: theme.fonts.tiny.fontSize,
         },
       }}
     >
-      {configSpeed == undefined ? "–" : `${displaySpeed(configSpeed)}×`}
+      {displayedSpeed == undefined ? "–" : `${formatSpeed(displayedSpeed)}×`}
     </DefaultButton>
   );
 }
