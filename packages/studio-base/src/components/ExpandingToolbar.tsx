@@ -13,7 +13,6 @@
 
 import { Pivot, PivotItem, Stack, IconButton, makeStyles, useTheme } from "@fluentui/react";
 import cx from "classnames";
-// import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
 import { ReactElement } from "react";
 
 const PANE_WIDTH = 268;

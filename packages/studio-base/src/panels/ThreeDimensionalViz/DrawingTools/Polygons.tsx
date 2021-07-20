@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DefaultButton, Label, Stack, useTheme } from "@fluentui/react";
 import { PolygonBuilder, Polygon } from "regl-worldview";
-import styled from "styled-components";
 
-import Button from "@foxglove/studio-base/components/Button";
 import ValidatedInput from "@foxglove/studio-base/components/ValidatedInput";
 import {
   SValue,
@@ -31,18 +30,13 @@ import { polygonPointsValidator } from "@foxglove/studio-base/util/validators";
 
 export type Point2D = { x: number; y: number };
 
-export const SRow = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-`;
-
 type Props = {
   onSetPolygons: (polygons: Polygon[]) => void;
   polygonBuilder: PolygonBuilder;
 };
 
 export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.Element {
+  const theme = useTheme();
   const polygons: Polygon[] = polygonBuilder.polygons;
   const [polygonPoints, setPolygonPoints] = React.useState<Point2D[][]>(() =>
     polygonsToPoints(polygons),
@@ -53,7 +47,15 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
   polygonBuilder.onChange = polygonBuilderOnChange;
 
   return (
-    <>
+    <Stack
+      tokens={{
+        childrenGap: theme.spacing.s2,
+        padding: theme.spacing.s1,
+      }}
+    >
+      <Label styles={{ root: { fontSize: theme.fonts.small.fontSize } }}>
+        Start drawing by holding <kbd>ctrl</kbd> and clicking on the 3D panel.
+      </Label>
       <ValidatedInput
         value={polygonPoints}
         onChange={(newPolygonPoints) => {
@@ -63,26 +65,37 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
           }
         }}
         dataValidator={polygonPointsValidator}
+      />
+      <Stack
+        horizontal
+        horizontalAlign="space-between"
+        verticalAlign="center"
+        tokens={{ padding: `${theme.spacing.s2} 0 0 0` }}
       >
-        <Button
-          small
-          tooltip="Copy Polygons"
+        <Stack horizontal verticalAlign="center">
+          <SLabel>Total length:</SLabel>
+          <SValue>{getPolygonLineDistances(polygonPoints).toFixed(2)} m</SValue>
+        </Stack>
+        <DefaultButton
           onClick={() => {
             void clipboard.copy(getFormattedString(polygonPoints));
           }}
+          styles={{
+            label: {
+              fontSize: theme.fonts.small.fontSize,
+            },
+            root: {
+              height: "auto",
+              padding: theme.spacing.s2,
+              minWidth: "64px",
+              margin: 0,
+              borderRadius: theme.effects.roundedCorner2,
+            },
+          }}
         >
-          Copy
-        </Button>
-      </ValidatedInput>
-      <SRow>
-        <SLabel>Total length:</SLabel>
-        <SValue>{getPolygonLineDistances(polygonPoints).toFixed(2)} m</SValue>
-      </SRow>
-      <p style={{ marginTop: 0 }}>
-        <em>
-          Start drawing by holding <b>ctrl</b> and clicking on the 3D panel.
-        </em>
-      </p>
-    </>
+          Copy JSON
+        </DefaultButton>
+      </Stack>
+    </Stack>
   );
 }
