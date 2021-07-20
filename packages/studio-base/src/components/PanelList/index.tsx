@@ -69,7 +69,7 @@ const SScrollContainer = styled.div`
 `;
 
 const SEmptyState = styled.div`
-  padding: 0px 16px 16px;
+  padding: 8px 16px;
   opacity: 0.4;
 `;
 
@@ -225,38 +225,59 @@ function PanelList(props: Props): JSX.Element {
   }, []);
 
   const panelCatalog = usePanelCatalog();
-  const allPanels = useMemo(() => {
-    return [...panelCatalog.getPanels()].sort((a, b) =>
-      a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" }),
-    );
+  const { allRegularPanels, allPreconfiguredPanels } = useMemo(() => {
+    const { regular, preconfigured } = panelCatalog.getPanels();
+    const sortByTitle = (a: PanelInfo, b: PanelInfo) =>
+      a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" });
+
+    return {
+      allRegularPanels: [...regular].sort(sortByTitle),
+      allPreconfiguredPanels: [...preconfigured].sort(sortByTitle),
+    };
   }, [panelCatalog]);
 
   useEffect(() => {
-    verifyPanels(allPanels);
-  }, [allPanels]);
+    verifyPanels([...allRegularPanels, ...allPreconfiguredPanels]);
+  }, [allRegularPanels, allPreconfiguredPanels]);
 
-  const filteredPanels = React.useMemo(() => {
-    return searchQuery.length > 0
-      ? fuzzySort
-          .go(searchQuery, allPanels, { key: "title" })
-          .map((searchResult) => searchResult.obj)
-      : allPanels;
-  }, [allPanels, searchQuery]);
-
-  const highlightedPanel = React.useMemo(
-    () => (highlightedPanelIdx != undefined ? filteredPanels[highlightedPanelIdx] : undefined),
-    [filteredPanels, highlightedPanelIdx],
+  const getFilteredPanels = React.useCallback(
+    (panels: PanelInfo[]) => {
+      return searchQuery.length > 0
+        ? fuzzySort
+            .go(searchQuery, panels, { key: "title" })
+            .map((searchResult) => searchResult.obj)
+        : panels;
+    },
+    [searchQuery],
   );
 
-  const noResults = filteredPanels.length === 0;
+  const { filteredRegularPanels, filteredPreconfiguredPanels } = React.useMemo(
+    () => ({
+      filteredRegularPanels: getFilteredPanels(allRegularPanels),
+      filteredPreconfiguredPanels: getFilteredPanels(allPreconfiguredPanels),
+    }),
+    [getFilteredPanels, allRegularPanels, allPreconfiguredPanels],
+  );
+
+  const allFilteredPanels = React.useMemo(
+    () => [...filteredPreconfiguredPanels, ...filteredRegularPanels],
+    [filteredPreconfiguredPanels, filteredRegularPanels],
+  );
+
+  const highlightedPanel = React.useMemo(() => {
+    return highlightedPanelIdx != undefined ? allFilteredPanels[highlightedPanelIdx] : undefined;
+  }, [allFilteredPanels, highlightedPanelIdx]);
+
+  const noResults = filteredRegularPanels.length === 0;
+  const noPreconfiguredResults = filteredPreconfiguredPanels.length === 0;
 
   const onKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "ArrowDown" && highlightedPanelIdx != undefined) {
-        setHighlightedPanelIdx((highlightedPanelIdx + 1) % filteredPanels.length);
+        setHighlightedPanelIdx((highlightedPanelIdx + 1) % allFilteredPanels.length);
       } else if (e.key === "ArrowUp" && highlightedPanelIdx != undefined) {
-        const newIdx = (highlightedPanelIdx - 1) % (filteredPanels.length - 1);
-        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredPanels.length + newIdx);
+        const newIdx = (highlightedPanelIdx - 1) % (allFilteredPanels.length - 1);
+        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : allFilteredPanels.length + newIdx);
       } else if (e.key === "Enter" && highlightedPanel) {
         onPanelSelect({
           type: highlightedPanel.type,
@@ -265,7 +286,7 @@ function PanelList(props: Props): JSX.Element {
         });
       }
     },
-    [filteredPanels.length, highlightedPanel, highlightedPanelIdx, onPanelSelect],
+    [allFilteredPanels.length, highlightedPanel, highlightedPanelIdx, onPanelSelect],
   );
 
   const displayPanelListItem = React.useCallback(
@@ -314,8 +335,13 @@ function PanelList(props: Props): JSX.Element {
         </div>
       </StickyDiv>
       <SScrollContainer>
+        {noPreconfiguredResults && (
+          <SEmptyState>No preconfigured panels match search criteria.</SEmptyState>
+        )}
+        {filteredPreconfiguredPanels.map(displayPanelListItem)}
+        <hr />
         {noResults && <SEmptyState>No panels match search criteria.</SEmptyState>}
-        {filteredPanels.map(displayPanelListItem)}
+        {filteredRegularPanels.map(displayPanelListItem)}
       </SScrollContainer>
     </div>
   );
