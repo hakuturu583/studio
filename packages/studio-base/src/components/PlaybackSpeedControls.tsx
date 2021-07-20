@@ -83,10 +83,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
         rootHovered: {
           background: theme.semanticColors.buttonBackgroundPressed,
         },
-        label: {
-          // FIXME: no line break
-          ...theme.fonts.small,
-        },
+        label: theme.fonts.small,
         menuIcon: {
           fontSize: theme.fonts.tiny.fontSize,
         },

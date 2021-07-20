@@ -11,7 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DefaultButton, DirectionalHint, Stack, Text, TextField, useTheme } from "@fluentui/react";
+import {
+  DefaultButton,
+  DirectionalHint,
+  ITextFieldStyles,
+  Stack,
+  TextField,
+  useTheme,
+} from "@fluentui/react";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
 import { Time } from "@foxglove/rostime";
@@ -44,7 +51,7 @@ const PlaybackTimeDisplayMethod = ({
   onPause: () => void;
   isPlaying: boolean;
 }): JSX.Element => {
-  const theme = useTheme();
+  const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
   const timeDisplayMethod = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.timeDisplayMethod ?? "ROS",
   );
@@ -54,10 +61,6 @@ const PlaybackTimeDisplayMethod = ({
       setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
     [setPlaybackConfig],
   );
-
-  const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-
   const currentTimeString = useMemo(() => {
     if (currentTime) {
       return timeDisplayMethod === "ROS"
@@ -66,8 +69,45 @@ const PlaybackTimeDisplayMethod = ({
     }
     return undefined;
   }, [currentTime, timeDisplayMethod, timezone]);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputText, setInputText] = useState<string | undefined>(currentTimeString ?? undefined);
   const [hasError, setHasError] = useState<boolean>(false);
+
+  const theme = useTheme();
+  const textFieldStyles = useMemo(
+    () =>
+      ({
+        errorMessage: {
+          display: "none",
+        },
+        field: {
+          margin: 0,
+          whiteSpace: "nowrap",
+          fontFamily: MONOSPACE,
+
+          ":hover": {
+            borderRadius: 2,
+            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+          },
+        },
+        fieldGroup: {
+          border: "none",
+        },
+        icon: {
+          height: 20,
+          color: hasError ? theme.semanticColors.errorIcon : undefined,
+        },
+        root: {
+          marginLeft: theme.spacing.s1,
+
+          "&.is-disabled input[disabled]": {
+            background: "transparent",
+            cursor: "not-allowed",
+          },
+        },
+      } as Partial<ITextFieldStyles>),
+    [hasError, theme],
+  );
 
   const onSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -93,6 +133,7 @@ const PlaybackTimeDisplayMethod = ({
 
       // If input is valid, clear error state, exit edit mode, and seek to input timestamp
       setHasError(false);
+
       if (
         validTimeAndMethod.time &&
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
@@ -133,7 +174,6 @@ const PlaybackTimeDisplayMethod = ({
       }}
     >
       {currentTime ? (
-        // isEditing ? (
         <form onSubmit={onSubmit} style={{ width: "100%" }}>
           <TextField
             ariaLabel="Playback Time Method"
@@ -151,33 +191,16 @@ const PlaybackTimeDisplayMethod = ({
             onBlur={(e) => {
               onSubmit(e);
               setIsEditing(false);
+              setTimeout(() => setHasError(false), 600);
             }}
-            size={22}
-            styles={{
-              errorMessage: {
-                display: "none",
-              },
-              field: {
-                margin: 0,
-                whiteSpace: "nowrap",
-                fontFamily: MONOSPACE,
-
-                ":hover": {
-                  cursor: "pointer",
-                  borderRadius: 2,
-                  backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-                },
-              },
-              fieldGroup: {
-                border: "none",
-              },
-              icon: { height: 20 },
-            }}
+            iconProps={{ iconName: hasError ? "Warning" : undefined }}
+            size={21}
+            styles={textFieldStyles}
             onChange={(_, newValue) => setInputText(newValue)}
           />
         </form>
       ) : (
-        <span data-test="PlaybackTime-text">–</span>
+        <TextField disabled size={13} styles={textFieldStyles} value="–" />
       )}
       <DefaultButton
         menuProps={{

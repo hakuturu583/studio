@@ -53,7 +53,10 @@ export default function MessageOrderControls(): JSX.Element {
           rootHovered: {
             background: theme.semanticColors.buttonBackgroundPressed,
           },
-          label: theme.fonts.small,
+          label: {
+            ...theme.fonts.small,
+            whiteSpace: "nowrap",
+          },
           menuIcon: {
             fontSize: theme.fonts.tiny.fontSize,
           },

@@ -42,7 +42,6 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConf
 import { PlayerState } from "@foxglove/studio-base/players/types";
 import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
-import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
