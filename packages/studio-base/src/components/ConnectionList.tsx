@@ -3,14 +3,31 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ActionButton, Text, useTheme } from "@fluentui/react";
+import { useState } from "react";
 
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import {
+  PlayerSourceDefinition,
+  usePlayerSelection,
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 export default function ConnectionList(): JSX.Element {
+  const [selectedSource, setSelectedSource] = useState<PlayerSourceDefinition | undefined>(
+    undefined,
+  );
   const { selectSource, availableSources } = usePlayerSelection();
 
   const theme = useTheme();
   const { currentSourceName } = usePlayerSelection();
+
+  if (selectedSource) {
+    return (
+      <>
+        <Text block>{selectedSource.name}</Text>
+        <selectedSource.component onPlayer={(player) => selectSource(player)} />
+      </>
+    );
+  }
+
   return (
     <>
       <Text
@@ -22,27 +39,6 @@ export default function ConnectionList(): JSX.Element {
           : "Not connected. Choose a data source below to get started."}
       </Text>
       {availableSources.map((source) => {
-        let iconName: RegisteredIconNames;
-        switch (source.type) {
-          case "ros1-local-bagfile":
-            iconName = "OpenFile";
-            break;
-          case "ros2-folder":
-            iconName = "OpenFolder";
-            break;
-          case "ros1-socket":
-            iconName = "studio.ROS";
-            break;
-          case "ros-ws":
-            iconName = "Flow";
-            break;
-          case "ros1-remote-bagfile":
-            iconName = "FileASPX";
-            break;
-          case "velodyne-device":
-            iconName = "GenericScan";
-            break;
-        }
         return (
           <div key={source.name}>
             <ActionButton
@@ -54,11 +50,7 @@ export default function ConnectionList(): JSX.Element {
                   textAlign: "left",
                 },
               }}
-              iconProps={{
-                iconName,
-                styles: { root: { "& span": { verticalAlign: "baseline" } } },
-              }}
-              onClick={() => selectSource(source)}
+              onClick={() => setSelectedSource(source)}
             >
               {source.name}
             </ActionButton>

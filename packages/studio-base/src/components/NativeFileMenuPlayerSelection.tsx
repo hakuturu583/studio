@@ -20,7 +20,8 @@ export function NativeFileMenuPlayerSelection(): ReactElement {
 
     for (const item of availableSources) {
       nativeAppMenu.addFileEntry(item.name, () => {
-        selectSource(item);
+        // fixme - how to select source? //
+        //selectSource(item);
       });
     }
 
