@@ -335,7 +335,7 @@ function PanelList(props: Props): JSX.Element {
         </div>
       </StickyDiv>
       <SScrollContainer>
-        {noPreconfiguredResults && (
+        {noPreconfiguredResults && allPreconfiguredPanels.length > 0 && (
           <SEmptyState>No preconfigured panels match search criteria.</SEmptyState>
         )}
         {filteredPreconfiguredPanels.map(displayPanelListItem)}
