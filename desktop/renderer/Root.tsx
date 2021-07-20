@@ -12,7 +12,7 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
-  // fixme - expose these at top level?
+  // fixme - expose these at top level? this one should be in desktop?
   ros1PlayerSource,
 } from "@foxglove/studio-base";
 

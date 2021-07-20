@@ -10,7 +10,7 @@ export type PlayerSourceDefinition = {
   id: string;
   name: string;
 
-  component: FunctionComponent<{ onPlayer: (player: Player) => void }>;
+  component: FunctionComponent<unknown>;
 };
 
 /*

@@ -14,19 +14,13 @@ export default function ConnectionList(): JSX.Element {
   const [selectedSource, setSelectedSource] = useState<PlayerSourceDefinition | undefined>(
     undefined,
   );
-  const { selectSource, availableSources } = usePlayerSelection();
+  const { availableSources } = usePlayerSelection();
 
   const theme = useTheme();
   const { currentSourceName } = usePlayerSelection();
 
-  if (selectedSource) {
-    return (
-      <>
-        <Text block>{selectedSource.name}</Text>
-        <selectedSource.component onPlayer={(player) => selectSource(player)} />
-      </>
-    );
-  }
+  // fixme - if the source is already selected then the source component isn't re-added
+  // so any source components that show a prompt on mount a are not run
 
   return (
     <>
@@ -38,6 +32,7 @@ export default function ConnectionList(): JSX.Element {
           ? currentSourceName
           : "Not connected. Choose a data source below to get started."}
       </Text>
+      {selectedSource && <selectedSource.component />}
       {availableSources.map((source) => {
         return (
           <div key={source.name}>
