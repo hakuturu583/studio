@@ -12,12 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
-//import { useLocalStorage, useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
-//import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-//import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import {
   MaybePlayer,
   MessagePipelineProvider,
@@ -38,8 +35,6 @@ import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import { BuildPlayerOptions } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
-
-//const log = Logger.getLogger(__filename);
 
 const DEFAULT_MESSAGE_ORDER = "receiveTime";
 const EMPTY_USER_NODES: UserNodes = Object.freeze({});

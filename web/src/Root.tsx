@@ -34,8 +34,6 @@ export default function Root(): JSX.Element {
           action: () => {},
         });
 
-        // fixme - this doesn't run more than once cause the player source component
-        // is already mounted
         useEffect(() => {
           open();
         }, [open]);

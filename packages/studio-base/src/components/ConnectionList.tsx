@@ -11,16 +11,13 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 export default function ConnectionList(): JSX.Element {
+  const theme = useTheme();
   const [selectedSource, setSelectedSource] = useState<PlayerSourceDefinition | undefined>(
     undefined,
   );
-  const { availableSources } = usePlayerSelection();
+  const { currentSourceName, availableSources } = usePlayerSelection();
 
-  const theme = useTheme();
-  const { currentSourceName } = usePlayerSelection();
-
-  // fixme - if the source is already selected then the source component isn't re-added
-  // so any source components that show a prompt on mount a are not run
+  const [count, setCount] = useState(0);
 
   return (
     <>
@@ -32,7 +29,7 @@ export default function ConnectionList(): JSX.Element {
           ? currentSourceName
           : "Not connected. Choose a data source below to get started."}
       </Text>
-      {selectedSource && <selectedSource.component />}
+      {selectedSource && <selectedSource.component key={count} />}
       {availableSources.map((source) => {
         return (
           <div key={source.name}>
@@ -45,7 +42,10 @@ export default function ConnectionList(): JSX.Element {
                   textAlign: "left",
                 },
               }}
-              onClick={() => setSelectedSource(source)}
+              onClick={() => {
+                setCount((old) => old + 1);
+                setSelectedSource(source);
+              }}
             >
               {source.name}
             </ActionButton>
