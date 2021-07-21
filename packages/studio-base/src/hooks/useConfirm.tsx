@@ -12,11 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import { DefaultButton, Dialog, DialogFooter } from "@fluentui/react";
-import React, { useState, useCallback } from "react";
+import { useCallback, useEffect, useContext, useRef } from "react";
 
-type ConfirmStyle = "danger" | "primary";
+import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
-type Props = {
+type ConfirmVariant = "danger" | "primary";
+type ConfirmAction = "ok" | "cancel";
+
+type ConfirmOptions = {
   // the title of the confirm modal
   title: string;
   // the prompt text in the body of the confirm modal
@@ -26,31 +29,43 @@ type Props = {
   // the text for the cancel button - defaults to "Cancel"
   // set to false to completely hide the cancel button
   cancel?: string | false;
-
-  // whether to use red/green/no color on the confirm button
-  confirmStyle: ConfirmStyle;
-
-  // action to run when the dialog is closed
-  action(ok: boolean): void;
+  // indicate the type of confirmation
+  variant?: ConfirmVariant;
 };
 
-// shows a confirmation modal to the user with an ok and a cancel button
-export default function useConfirm(props: Props): {
-  modal?: React.ReactElement | ReactNull;
-  open: () => void;
-} {
-  const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback(() => setIsOpen(true), []);
+type ConfirmModalProps = ConfirmOptions & {
+  onComplete: (value: ConfirmAction) => void;
+};
 
-  function close(ok: boolean) {
-    setIsOpen(false);
-    props.action(ok);
-  }
-  const confirmStyle = props.confirmStyle ?? "danger";
+function ConfirmModal(props: ConfirmModalProps) {
+  const originalOnComplete = props.onComplete;
+
+  const completed = useRef(false);
+  const onComplete = useCallback(
+    (result: ConfirmAction) => {
+      if (!completed.current) {
+        completed.current = true;
+        originalOnComplete(result);
+      }
+    },
+    [originalOnComplete],
+  );
+
+  // Ensure we still call onComplete(undefined) when the component unmounts, if it hasn't been
+  // called already
+  useEffect(() => {
+    return () => onComplete("cancel");
+  }, [onComplete]);
+
+  const confirmStyle = props.variant ?? "primary";
 
   const buttons = [
     props.cancel !== false && (
-      <DefaultButton key="cancel" onClick={() => close(false)} text={props.cancel ?? "Cancel"} />
+      <DefaultButton
+        key="cancel"
+        onClick={() => onComplete("cancel")}
+        text={props.cancel ?? "Cancel"}
+      />
     ),
     <DefaultButton
       key="confirm"
@@ -80,22 +95,45 @@ export default function useConfirm(props: Props): {
     buttons.reverse();
   }
 
-  const modal = (
+  return (
     <Dialog
-      hidden={!isOpen}
-      onDismiss={() => close(false)}
+      hidden={false}
+      onDismiss={() => onComplete("cancel")}
       dialogContentProps={{ title: props.title, subText: props.prompt }}
     >
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          close(true);
+          onComplete("cancel");
         }}
       >
         <DialogFooter styles={{ actions: { whiteSpace: "nowrap" } }}>{buttons}</DialogFooter>
       </form>
     </Dialog>
   );
+}
 
-  return { modal, open };
+// Returns a function that can be used similarly to the DOM confirm(), but
+// backed by a React element rather than a native modal, and asynchronous.
+export function useConfirm(): (options: ConfirmOptions) => Promise<ConfirmAction> {
+  const modalHost = useContext(ModalContext);
+
+  const openConfirm = useCallback(
+    async (options: ConfirmOptions) => {
+      return await new Promise<ConfirmAction>((resolve) => {
+        const remove = modalHost.addModalElement(
+          <ConfirmModal
+            {...options}
+            onComplete={(value) => {
+              resolve(value);
+              remove();
+            }}
+          />,
+        );
+      });
+    },
+    [modalHost],
+  );
+
+  return openConfirm;
 }

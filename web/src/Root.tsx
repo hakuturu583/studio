@@ -22,6 +22,11 @@ const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo
 export function Root(): JSX.Element {
   const playerSources: PlayerSourceDefinition[] = [
     {
+      name: "ROS 1",
+      type: "ros1-socket",
+      disabledReason: "ROS 1 Native connections require the desktop app.",
+    },
+    {
       name: "Rosbridge (WebSocket)",
       type: "ros-ws",
     },
@@ -36,6 +41,11 @@ export function Root(): JSX.Element {
     {
       name: "ROS 2 Bag Folder (local)",
       type: "ros2-folder",
+    },
+    {
+      name: "Velodyne LIDAR",
+      type: "velodyne-device",
+      disabledReason: "Velodyne connections require the desktop app.",
     },
   ];
 

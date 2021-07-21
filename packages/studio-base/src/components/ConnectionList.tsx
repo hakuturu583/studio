@@ -3,14 +3,38 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ActionButton, Text, useTheme } from "@fluentui/react";
+import { useCallback } from "react";
 
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import {
+  PlayerSourceDefinition,
+  usePlayerSelection,
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
 export default function ConnectionList(): JSX.Element {
   const { selectSource, availableSources } = usePlayerSelection();
+  const confirm = useConfirm();
 
   const theme = useTheme();
   const { currentSourceName } = usePlayerSelection();
+
+  const onSourceClick = useCallback(
+    (source: PlayerSourceDefinition) => {
+      if (source.disabledReason != undefined) {
+        void confirm({
+          title: "Unsupported Connection",
+          prompt: source.disabledReason,
+          variant: "primary",
+          cancel: false,
+        });
+        return;
+      }
+
+      selectSource(source);
+    },
+    [confirm, selectSource],
+  );
+
   return (
     <>
       <Text
@@ -58,7 +82,7 @@ export default function ConnectionList(): JSX.Element {
                 iconName,
                 styles: { root: { "& span": { verticalAlign: "baseline" } } },
               }}
-              onClick={() => selectSource(source)}
+              onClick={() => onSourceClick(source)}
             >
               {source.name}
             </ActionButton>
