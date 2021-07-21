@@ -2,7 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, DirectionalHint, IContextualMenuItem, useTheme } from "@fluentui/react";
+import {
+  DefaultButton,
+  DirectionalHint,
+  IContextualMenuItem,
+  IMenuItemStyles,
+  useTheme,
+} from "@fluentui/react";
 import { useCallback, useEffect } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
@@ -66,11 +72,20 @@ export default function PlaybackSpeedControls(): JSX.Element {
           (option: number): IContextualMenuItem => ({
             canCheck: true,
             key: `${option}`,
-            text: `${formatSpeed(option)}`,
+            text: `${formatSpeed(option)}×`,
             isChecked: displayedSpeed === option,
             onClick: () => setSpeed(option),
           }),
         ),
+        styles: {
+          subComponentStyles: {
+            menuItem: {
+              label: { fontSize: theme.fonts.small.fontSize },
+              // Reach into the component styles to remove the effects of global.scss
+              root: { margin: 0, borderRadius: 0 },
+            } as Partial<IMenuItemStyles>,
+          },
+        },
       }}
       styles={{
         root: {
@@ -78,7 +93,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
           border: "none",
           padding: theme.spacing.s1,
           margin: 0, // Remove this once global.scss has gone away
-          minWidth: "50px",
+          minWidth: "60px",
         },
         rootHovered: {
           background: theme.semanticColors.buttonBackgroundPressed,
